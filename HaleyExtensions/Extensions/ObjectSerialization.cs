@@ -14,6 +14,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using ProtoBuf.Serializers;
 using ProtoBuf;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Haley.Utils
 {
@@ -33,7 +35,7 @@ namespace Haley.Utils
             //DataContractSerializer serializer = new DataContractSerializer(_type, extraTypes);
             //serializer.WriteObject(xw, source);
             #endregion
-            XmlSerializer serializer = new XmlSerializer(_type);
+            XmlSerializer serializer = new XmlSerializer(_type); //New serializer for the given type.
             //TO IGNORE UNWANTED NAMESPACES
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces(new[] { XmlQualifiedName.Empty });
             StringWriter sw = new StringWriter();
@@ -41,6 +43,30 @@ namespace Haley.Utils
             serializer.Serialize(xw, source, ns);
             return XElement.Parse(sw.ToString());
         }
+
+        public static string ToJson(this object source,List<JsonConverter> converters = null)
+        {
+            var _jsonOptions = new JsonSerializerOptions() {WriteIndented = true};
+                _jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+                _jsonOptions.Converters.Add(new JsonStringEnumConverter());
+            if (converters!= null && converters?.Count> 0)
+            {
+                foreach (var item in converters)
+                {
+                    try
+                    {
+                        _jsonOptions.Converters.Add(item);
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+            }
+            return JsonSerializer.Serialize(source, source.GetType(), _jsonOptions);
+        }
+
+
         public static string binarySerialize(this object input)
         {
             string result = null;
