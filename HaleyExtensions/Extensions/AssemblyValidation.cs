@@ -17,11 +17,10 @@ namespace Haley.Utils
             {
                 return false;
             }
-
-            return assembly.GetCustomAttribute<DebuggableAttribute>()?.IsJITTrackingEnabled ?? false;
+            return assembly.GetCustomAttributes(false).OfType<DebuggableAttribute>().Any(da => da.IsJITTrackingEnabled);
         }
 
-        public static string getSignedKey(this Assembly assembly)
+        public static string GetSignedKey(this Assembly assembly)
         {
             try
             {

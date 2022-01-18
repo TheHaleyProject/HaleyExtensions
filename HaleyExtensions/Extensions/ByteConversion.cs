@@ -15,7 +15,7 @@ namespace Haley.Utils
 {
     public static class ByteConversion
     {
-      public static string getPublicKey(this byte[] array)
+      public static string GetPublicKey(this byte[] array)
         {
             try
             {

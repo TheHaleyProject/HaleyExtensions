@@ -9,7 +9,7 @@ namespace Haley.Utils
 {
     public static class XMLConversions
     {
-        public static XmlDocument toXMLDocument(this XDocument doc)
+        public static XmlDocument ToXMLDocument(this XDocument doc)
         {
             var xmlDocument = new XmlDocument();
             using (var xmlReader = doc.CreateReader())
@@ -19,7 +19,7 @@ namespace Haley.Utils
             return xmlDocument;
         }
 
-        public static XDocument toXDocument(this XmlDocument doc)
+        public static XDocument ToXDocument(this XmlDocument doc)
         {
             using (var nodeReader = new XmlNodeReader(doc))
             {

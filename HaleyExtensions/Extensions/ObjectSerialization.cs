@@ -66,8 +66,7 @@ namespace Haley.Utils
             return JsonSerializer.Serialize(source, source.GetType(), _jsonOptions);
         }
 
-
-        public static string binarySerialize(this object input)
+        public static string BinarySerialize(this object input)
         {
             string result = null;
             try
@@ -86,7 +85,7 @@ namespace Haley.Utils
                 throw ex;
             }
         }
-        public static object binaryDeserialize(this string input)
+        public static object BinaryDeserialize(this string input)
         {
             object result = null;
             try
@@ -103,11 +102,11 @@ namespace Haley.Utils
                 throw ex;
             }
         }
-        public static T binaryDeserialize<T>(this string input)
+        public static T BinaryDeserialize<T>(this string input)
         {
-            return  (T)input.binaryDeserialize();
+            return  (T)input.BinaryDeserialize();
         }
-        public static string protoSerialize(this object input)
+        public static string ProtoSerialize(this object input)
         {
             string result = null;
             try
@@ -124,7 +123,7 @@ namespace Haley.Utils
                 throw ex;
             }
         }
-        public static T protoDeserialize<T>(this string input)
+        public static T ProtoDeserialize<T>(this string input)
         {
             try
             {

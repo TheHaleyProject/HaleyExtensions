@@ -8,7 +8,7 @@ namespace Haley.Utils
 {
     public static class EnumConversion
     {
-        public static string getKey(this Enum @enum)
+        public static string GetKey(this Enum @enum)
         {
             try
             {
@@ -22,7 +22,7 @@ namespace Haley.Utils
                 throw ex;
             }
         }
-        public static string getDescription(this Enum @enum)
+        public static string GetDescription(this Enum @enum)
         {
             FieldInfo fi = @enum.GetType().GetField(@enum.ToString());
             var attributes = fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -35,7 +35,7 @@ namespace Haley.Utils
         /// <typeparam name="T"></typeparam>
         /// <param name="description"></param>
         /// <returns></returns>
-        public static T getValueFromDescription<T>(this string description) where T : Enum
+        public static T GetValueFromDescription<T>(this string description) where T : Enum
         {
             foreach (var field in typeof(T).GetFields())
             {

@@ -16,30 +16,34 @@ namespace Haley.Utils
     public static class ObjectConversion
     {
         #region Conversions
-        public static string asString(this object value)
+        public static string AsString(this object value)
         {
             if (value == null) return null;
             Type InputType = value.GetType();
             return (Convert.ChangeType(value, value.GetType()))?.ToString() ?? null;
         }
-        public static object changeType(this object value, Type targetType)
+        public static T ChangeType<T>(this object value)
+        {
+            if (value == null) return default(T); //because the input value is null, we cannot change any type.
+
+            return (T)ChangeType(value, typeof(T));
+        }
+
+        public static object ChangeType(this object value, Type targetType)
         {
             if (targetType == typeof(string)) return (string)value;
             if (targetType == typeof(int)) return int.Parse((string)value);
             if (targetType == typeof(double)) return double.Parse((string)value);
             if (targetType == typeof(bool)) return bool.Parse((string)value);
             if (targetType.BaseType == typeof(Enum)) return value;
-            if (targetType.IsList() || targetType.IsArray) return _changeType(value, targetType);
-            return value;
+            if (targetType.IsList() || targetType.IsArray) return _changeCollectionType(value, targetType);
+            return _convertReflected(value,targetType);
         }
-        public static T changeType<T>(this object value)
-        {
-            return (T)_changeType(value, typeof(T));
-        }
+       
         #endregion
 
         #region Helpers
-        private static object _changeType(object value, Type contract_collections_type)
+        private static object _changeCollectionType(object value, Type contract_collections_type)
         {
             if (!value.IsList()) return value; //It is expected that the incoming object should be of List<object>
 
@@ -61,14 +65,14 @@ namespace Haley.Utils
 
             if (contract_collections_type.IsList())
             {
-                return ConvertList(concrete_instances, contract_type);
+                return _convertList(concrete_instances, contract_type);
             }
             else //Then it should be an array
             {
-                return ConvertList(concrete_instances, contract_type, true);
+                return _convertList(concrete_instances, contract_type, true);
             }
         }
-        private static object ConvertList(List<object> instances, Type contract_type, bool is_array = false)
+        private static object _convertList(List<object> instances, Type contract_type, bool is_array = false)
         {
             if (contract_type == null) throw new ArgumentException("Contract type cannot be empty. Unable to convert to list.");
             var enumerable_type = typeof(Enumerable);
@@ -96,6 +100,20 @@ namespace Haley.Utils
             var casted_objects = cast_method.Invoke(null, new[] { items_to_cast });
             var _result = conversion_method.Invoke(null, new[] { casted_objects });
             return _result;
+        }
+        private static object _convertReflected(object value, Type contract_type)
+        {
+            try
+            {
+                var methodInfo = typeof(ObjectConversion).GetMethod(nameof(ChangeType), BindingFlags.Static | BindingFlags.Public);
+                var genericArguments = new[] { contract_type };
+                var genericMethodInfo = methodInfo?.MakeGenericMethod(genericArguments);
+                return genericMethodInfo?.Invoke(null, new[] { value });
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
         #endregion
     }

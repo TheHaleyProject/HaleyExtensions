@@ -6,7 +6,7 @@ namespace Haley.Utils
 {
     public static class StringHelpers
     {
-        public static string padCenter(this string source, int length, char character = '\u0000')
+        public static string PadCenter(this string source, int length, char character = '\u0000')
         {
             int space_available = length - source.Length;
             int pad_left = (space_available / 2) + source.Length; //Amount to pad left.
@@ -19,7 +19,7 @@ namespace Haley.Utils
                 return source.PadLeft(pad_left, character).PadRight(length, character);
             }
         }
-        public static bool isBase64(this string input)
+        public static bool IsBase64(this string input)
         {
             if (string.IsNullOrEmpty(input) || input.Length % 4 != 0
                || input.Contains(" ") || input.Contains("\t") || input.Contains("\r") || input.Contains("\n"))
@@ -34,7 +34,7 @@ namespace Haley.Utils
                 return false;
             }
         }
-        public static string toNumber(this string input)
+        public static string ToNumber(this string input)
         {
             string numbered_key = string.Empty;
             foreach (var _char in input)
