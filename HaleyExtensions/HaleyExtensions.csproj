@@ -14,7 +14,7 @@
 		  <IncludeSymbols>true</IncludeSymbols>
 		  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		  <PackageIcon>Haley.png</PackageIcon>
-		  <PackageReleaseNotes>Naming conventions changed. All camel cases changed as Pascal case</PackageReleaseNotes>
+		  <PackageReleaseNotes>Order by alphanumeric string added.</PackageReleaseNotes>
 		  <RepositoryUrl>https://github.com/rmsmech/HaleyExtensions</RepositoryUrl>
 		  <RepositoryType>GIT</RepositoryType>
 		  <SignAssembly>true</SignAssembly>
@@ -22,7 +22,7 @@
 		  <AssemblyVersion>2.0.1.0</AssemblyVersion>
 		  <FileVersion>2.0.1.0</FileVersion>
 		  <PackageTags>IOC, DependencyInjection, DI</PackageTags>
-		  <Version>2.1.0</Version>
+		  <Version>2.1.2</Version>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>portable</DebugType>

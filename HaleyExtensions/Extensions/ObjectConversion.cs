@@ -37,7 +37,8 @@ namespace Haley.Utils
             if (targetType == typeof(bool)) return bool.Parse((string)value);
             if (targetType.BaseType == typeof(Enum)) return value;
             if (targetType.IsList() || targetType.IsArray) return _changeCollectionType(value, targetType);
-            return _convertReflected(value,targetType);
+            return value; 
+            //return _convertReflected(value,targetType); //Will enter into circular loop as we try to call the same type again and again
         }
        
         #endregion
@@ -105,14 +106,25 @@ namespace Haley.Utils
         {
             try
             {
-                var methodInfo = typeof(ObjectConversion).GetMethod(nameof(ChangeType), BindingFlags.Static | BindingFlags.Public);
+                //WE CANNOT USE BELOW METHOD BECAUSE WE HAVE MORE THAN ONE METHOD WITH NAME "CHANGE TYPE".
+                //var methodInfo = typeof(ObjectConversion).GetMethod(nameof(ChangeType), BindingFlags.Static | BindingFlags.Public);
+
+                //USE BELOW METHOD TO GET A SINGLE METHOD.
+                var methodInfo = typeof(ObjectConversion).GetMethods().Single(
+            p =>
+                p.Name == "ChangeType" &&
+                p.GetGenericArguments().Length == 1 && //Should have atleast one generic argument length
+                p.GetParameters().Length == 1);  //Should have atleast one parameter
+                //&& p.GetParameters()[0].ParameterType == typeof(object)); //if parameter type also needs to be filtered?
+
                 var genericArguments = new[] { contract_type };
+               
                 var genericMethodInfo = methodInfo?.MakeGenericMethod(genericArguments);
                 return genericMethodInfo?.Invoke(null, new[] { value });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                return value;
             }
         }
         #endregion
