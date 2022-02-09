@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Haley.Enums;
+using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Haley.Utils
 {
@@ -43,6 +46,40 @@ namespace Haley.Utils
                 numbered_key += index;
             }
             return numbered_key;
+        }
+        public static CompareStatus? CompareWith(this string source, string target)
+        {
+            var _pattern = @"\d+";
+
+            //If either source or target is null, return null. Donot compare.
+            if (string.IsNullOrWhiteSpace(source)) return null;
+            if (string.IsNullOrWhiteSpace(target)) return CompareStatus.Greater; //If target is null, then we are already greater.
+
+            List<string> _overall = new List<string>() { source, target };
+
+            int max = _overall
+                .SelectMany(p =>
+                Regex.Matches(p, _pattern) //Matches searches for all occurences in the string and produces as a match collection
+                .Cast<Match>()
+                .Select(m => (int?)m.Value.Length)) //from the match collection select all the length of values (to find out how many digits we have continuously (lets say we get 1, 0, 9531 for 1.0.9531)
+                .Max() ?? 0;
+            //The numeric value can be anywhere inside a string. It could be at end or middle or at start.
+            //among the collection, find which has maximum length.
+
+            var _source_padded = Regex.Replace(source, _pattern, m => m.Value.PadLeft(max, '0'));
+            var _target_padded = Regex.Replace(target, _pattern, m => m.Value.PadLeft(max, '0'));
+
+            switch (_source_padded.CompareTo(_target_padded))
+            {
+                case 0:
+                    return CompareStatus.Equal;
+                case 1:
+                    return CompareStatus.Greater;
+                case -1:
+                    return CompareStatus.Lesser;
+            }
+
+            return null;
         }
     }
 }
