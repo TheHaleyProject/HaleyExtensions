@@ -1,4 +1,5 @@
 ﻿using System;
+using Haley.Enums;
 using Haley.Utils;
 
 namespace Haley.Models

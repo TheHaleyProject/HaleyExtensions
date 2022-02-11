@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Haley.Enums;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using Haley.Enums;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Haley.Utils
 {
