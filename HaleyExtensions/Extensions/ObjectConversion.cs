@@ -12,7 +12,7 @@ namespace Haley.Utils
         {
             if (value == null) return null;
             Type InputType = value.GetType();
-            return (Convert.ChangeType(value, value.GetType()))?.ToString() ?? null;
+            return (Convert.ChangeType(value, InputType))?.ToString() ?? null;
         }
         public static T ChangeType<T>(this object value)
         {
