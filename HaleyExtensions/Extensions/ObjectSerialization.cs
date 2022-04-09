@@ -46,24 +46,40 @@ namespace Haley.Utils
         public static T XmlDeserialize<T>(this string input)
         {
             Type _type = typeof(T);
-            XmlSerializer serializer = new XmlSerializer(_type); //New serializer for the given type.
+            return (T)XmlDeserialize(input,_type);
+        }
+
+        public static object XmlDeserialize(this string input,Type targetType)
+        {
+            XmlSerializer serializer = new XmlSerializer(targetType); //New serializer for the given type.
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces(new[] { XmlQualifiedName.Empty });
             StringReader rdr = new StringReader(input);
-            return (T)serializer.Deserialize(rdr);
+            return serializer.Deserialize(rdr);
         }
 
         public static T JsonDeserialize<T>(this string input)
         {
-            return JsonDeserializeInternal<T>(input, commonOptions);
+            return (T)JsonDeserializeInternal(input, commonOptions,typeof(T));
+        }
+
+        public static object JsonDeserialize(this string input,Type targetType)
+        {
+            return JsonDeserializeInternal(input, commonOptions,targetType);
         }
         public static T JsonDeserialize<T>(this string input, JsonSerializerOptions options)
         {
-            return JsonDeserializeInternal<T>(input, options);
+            return (T)JsonDeserializeInternal(input, options,typeof(T));
         }
 
-        private static T JsonDeserializeInternal<T>(string input,JsonSerializerOptions option)
+        public static object JsonDeserialize(this string input, JsonSerializerOptions options,Type targetType)
         {
-            return (T)JsonSerializer.Deserialize(input, typeof(T), options: option);
+            return JsonDeserializeInternal(input, options,targetType);
+        }
+
+        private static object JsonDeserializeInternal(string input,JsonSerializerOptions option,Type targetType)
+        {
+            if (targetType == null) throw new ArgumentException("Targettype cannot be null");
+            return JsonSerializer.Deserialize(input, targetType, options: option);
         }
 
         public static string ToJson(this object source,JsonSerializerOptions options)
@@ -143,6 +159,7 @@ namespace Haley.Utils
         {
             return  (T)input.BinaryDeserialize();
         }
+        
         public static string ProtoSerialize(this object input)
         {
             string result = null;
@@ -162,11 +179,16 @@ namespace Haley.Utils
         }
         public static T ProtoDeserialize<T>(this string input)
         {
+            return (T)ProtoDeserialize(input, typeof(T));
+        }
+
+        public static object ProtoDeserialize(this string input,Type targetType)
+        {
             try
             {
                 using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(input)))
                 {
-                   return Serializer.Deserialize<T>(ms);
+                    return Serializer.Deserialize(targetType,ms);
                 }
             }
             catch (Exception ex)
