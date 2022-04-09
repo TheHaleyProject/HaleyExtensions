@@ -20,6 +20,20 @@ namespace Haley.Utils
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         };
 
+        private static void EnsureDefaultJsonConverters(ref JsonSerializerOptions options)
+        {
+            if (!options.Converters.Contains(new JsonStringEnumConverter()))
+            {
+                try
+                {
+                    options.Converters.Add(new JsonStringEnumConverter());
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
         public static XElement ToXml(this object source)
         {
             Type _type = source.GetType();
@@ -78,6 +92,7 @@ namespace Haley.Utils
 
         private static object JsonDeserializeInternal(string input,JsonSerializerOptions option,Type targetType)
         {
+            EnsureDefaultJsonConverters(ref option);
             if (targetType == null) throw new ArgumentException("Targettype cannot be null");
             return JsonSerializer.Deserialize(input, targetType, options: option);
         }
@@ -88,16 +103,7 @@ namespace Haley.Utils
         }
         private static string ToJsonInternal(object source, ref JsonSerializerOptions options, List<JsonConverter> converters = null)
         {
-            if (!options.Converters.Contains(new JsonStringEnumConverter()))
-            {
-                try
-                {
-                    options.Converters.Add(new JsonStringEnumConverter());
-                }
-                catch (Exception)
-                {
-                }
-            }
+            EnsureDefaultJsonConverters(ref options);
 
             if (converters != null && converters?.Count > 0)
             {
