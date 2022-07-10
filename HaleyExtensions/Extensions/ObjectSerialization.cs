@@ -9,6 +9,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Collections;
+using System.Linq;
 
 namespace Haley.Utils
 {
@@ -22,7 +23,8 @@ namespace Haley.Utils
 
         private static void EnsureDefaultJsonConverters(ref JsonSerializerOptions options)
         {
-            if (!options.Converters.Contains(new JsonStringEnumConverter()))
+            var hasEnumConverter = options.Converters.Any(p => p is JsonStringEnumConverter);
+            if (!hasEnumConverter)
             {
                 try
                 {
@@ -103,23 +105,27 @@ namespace Haley.Utils
         }
         private static string ToJsonInternal(object source, ref JsonSerializerOptions options, List<JsonConverter> converters = null)
         {
-            EnsureDefaultJsonConverters(ref options);
+            try {
+                EnsureDefaultJsonConverters(ref options);
 
-            if (converters != null && converters?.Count > 0)
-            {
-                foreach (var item in converters)
-                {
-                    try
-                    {
-                        options.Converters.Add(item);
+                do {
+                    if (converters == null || converters?.Count == 0) break;
+
+                    foreach (var item in converters) {
+                        try {
+                            options.Converters.Add(item);
+                        }
+                        catch (Exception) {
+                            continue;
+                        }
                     }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
-                }
+                } while (false);
+                
+                return JsonSerializer.Serialize(source, source.GetType(), options);
             }
-            return JsonSerializer.Serialize(source, source.GetType(), options);
+            catch (Exception ex) {
+                return ex.ToString();
+            }
         }
         public static string ToJson(this object source,List<JsonConverter> converters = null)
         {
