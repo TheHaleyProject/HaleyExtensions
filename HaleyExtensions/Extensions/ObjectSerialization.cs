@@ -108,19 +108,23 @@ namespace Haley.Utils
             try {
                 EnsureDefaultJsonConverters(ref options);
 
-                do {
-                    if (converters == null || converters?.Count == 0) break;
+                try {
+                    do {
+                        if (converters == null || converters?.Count == 0) break;
 
-                    foreach (var item in converters) {
-                        try {
-                            options.Converters.Add(item);
+                        foreach (var item in converters) {
+                            try {
+                                options.Converters.Add(item);
+                            }
+                            catch (Exception) {
+                                continue;
+                            }
                         }
-                        catch (Exception) {
-                            continue;
-                        }
-                    }
-                } while (false);
-                
+                    } while (false);
+                }
+                catch (Exception) {
+
+                }
                 return JsonSerializer.Serialize(source, source.GetType(), options);
             }
             catch (Exception ex) {

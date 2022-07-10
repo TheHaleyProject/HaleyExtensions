@@ -22,7 +22,7 @@
 		  <AssemblyVersion>2.0.1.0</AssemblyVersion>
 		  <FileVersion>2.0.1.0</FileVersion>
 		  <PackageTags>IOC, DependencyInjection, DI</PackageTags>
-		  <Version>2.1.11.1</Version>
+		  <Version>2.1.12</Version>
 		  <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -36,8 +36,8 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="protobuf-net" Version="3.0.101" />
-	  <PackageReference Include="System.Text.Json" Version="6.0.1" />
+	  <PackageReference Include="protobuf-net" Version="3.1.17" />
+	  <PackageReference Include="System.Text.Json" Version="6.0.5" />
 	</ItemGroup>
 	<Import Project="$(SolutionDir)ProjectReferences_$(SolutionName).txt" Condition="Exists('$(SolutionDir)ProjectReferences_$(SolutionName).txt')" />
 	<Choose>
@@ -50,7 +50,7 @@
 		</When>
 		<Otherwise>
 			<ItemGroup>
-				<PackageReference Include="Haley.Abstractions" Version="1.0.16" />
+				<PackageReference Include="Haley.Abstractions" Version="1.0.17" />
 			</ItemGroup>
 		</Otherwise>
 	</Choose>
