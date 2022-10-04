@@ -59,13 +59,13 @@ namespace Haley.Utils
             return XElement.Parse(sw.ToString());
         }
 
-        public static T XmlDeserialize<T>(this string input)
+        public static T FromXml<T>(this string input)
         {
             Type _type = typeof(T);
-            return (T)XmlDeserialize(input,_type);
+            return (T)FromXml(input,_type);
         }
 
-        public static object XmlDeserialize(this string input,Type targetType)
+        public static object FromXml(this string input,Type targetType)
         {
             XmlSerializer serializer = new XmlSerializer(targetType); //New serializer for the given type.
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces(new[] { XmlQualifiedName.Empty });
@@ -73,30 +73,35 @@ namespace Haley.Utils
             return serializer.Deserialize(rdr);
         }
 
-        public static T JsonDeserialize<T>(this string input)
+        public static T FromJson<T>(this string input)
         {
-            return (T)JsonDeserializeInternal(input, commonOptions,typeof(T));
+            return FromJsonInternal<T>(input, commonOptions);
         }
 
-        public static object JsonDeserialize(this string input,Type targetType)
+        
+        public static T FromJson<T>(this string input, JsonSerializerOptions options)
         {
-            return JsonDeserializeInternal(input, commonOptions,targetType);
-        }
-        public static T JsonDeserialize<T>(this string input, JsonSerializerOptions options)
-        {
-            return (T)JsonDeserializeInternal(input, options,typeof(T));
+            return FromJsonInternal<T>(input, options);
         }
 
-        public static object JsonDeserialize(this string input, JsonSerializerOptions options,Type targetType)
-        {
-            return JsonDeserializeInternal(input, options,targetType);
+        public static object FromJson(this string input, Type targetType) {
+            return FromJsonInternal(input, commonOptions, targetType);
         }
 
-        private static object JsonDeserializeInternal(string input,JsonSerializerOptions option,Type targetType)
+        public static object FromJson(this string input, JsonSerializerOptions options,Type targetType)
+        {
+            return FromJsonInternal(input, options,targetType);
+        }
+
+        private static object FromJsonInternal(string input,JsonSerializerOptions option,Type targetType)
         {
             EnsureDefaultJsonConverters(ref option);
             if (targetType == null) throw new ArgumentException("Targettype cannot be null");
             return JsonSerializer.Deserialize(input, targetType, options: option);
+        }
+        private static T FromJsonInternal<T>(string input, JsonSerializerOptions option) {
+            EnsureDefaultJsonConverters(ref option);
+            return JsonSerializer.Deserialize<T>(input,options: option);
         }
 
         public static string ToJson(this object source,JsonSerializerOptions options)
