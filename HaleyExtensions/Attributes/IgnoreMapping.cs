@@ -8,7 +8,7 @@ namespace Haley.Models
     public class IgnoreMappingAttribute : Attribute
     {
         public IgnoreMappingMode Mode { get; set; }
-        public IgnoreMappingAttribute() { }
+        public IgnoreMappingAttribute() :this(IgnoreMappingMode.Both) { }
         public IgnoreMappingAttribute(IgnoreMappingMode mode) { Mode = mode; }
     }
 }
