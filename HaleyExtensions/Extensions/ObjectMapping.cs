@@ -75,7 +75,7 @@ namespace Haley.Utils
 
         public static void Map<TTarget>(this JsonNode source, ref TTarget target, StringComparison comparison_method = StringComparison.InvariantCulture, CustomTypeConverter typeParser = null) where TTarget : class, new() {
             if (source == null) return;
-            Dictionary<string, object> dic = source.AsObject()?.ToDictionary(p => p.Key, q => q.Value?.GetValue<object>() as object);
+            Dictionary<string, object> dic = source.AsObject()?.Where(p=>p.Value is JsonValue)?.ToDictionary(p => p.Key, q => q.Value?.GetValue<object>() as object); //works only for jsonvalue and not for json array (objects)
             Map(dic, ref target, comparison_method, typeParser);
         }
 
