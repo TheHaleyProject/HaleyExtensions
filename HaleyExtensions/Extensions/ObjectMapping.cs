@@ -74,13 +74,9 @@ namespace Haley.Utils
         }
 
         public static void Map<TTarget>(this JsonNode source, ref TTarget target, StringComparison comparison_method = StringComparison.InvariantCulture, CustomTypeConverter typeParser = null) where TTarget : class, new() {
-            try {
-                if (source == null) return;
-                Dictionary<string, object> dic = source.AsObject().ToDictionary(p => p.Key, q => q.Value as object);
-                Map(dic, ref target, comparison_method, typeParser);
-            } catch (Exception ex) {
-                //log later
-            }
+            if (source == null) return;
+            Dictionary<string, object> dic = source.AsObject()?.ToDictionary(p => p.Key, q => q.Value?.GetValue<object>() as object);
+            Map(dic, ref target, comparison_method, typeParser);
         }
 
         public static TTarget Map<TTarget>(this Dictionary<string, object> source, StringComparison comparison_method = StringComparison.InvariantCulture, CustomTypeConverter typeParser = null) where TTarget : class, new() {
