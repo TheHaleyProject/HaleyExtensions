@@ -75,7 +75,16 @@ namespace Haley.Utils
 
         public static void Map<TTarget>(this JsonNode source, ref TTarget target, StringComparison comparison_method = StringComparison.InvariantCulture, CustomTypeConverter typeParser = null) where TTarget : class, new() {
             if (source == null) return;
-            Dictionary<string, object> dic = source.AsObject()?.Where(p=>p.Value is JsonValue)?.ToDictionary(p => p.Key, q => q.Value?.GetValue<object>() as object); //works only for jsonvalue and not for json array (objects)
+            //single node will fail.. source (Jsonnode) has to be jsonobject (like an array), if source is a jsonvalue,then "AsObject" will throw exception
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            if (source is JsonValue) {
+                var _key  = source.GetPath();
+                var _value = source.GetValue<object>();
+                dic.Add(_key, _value);
+                //throw new DataException($@"Provided json node is a single object with value {source.GetValue<object>().ToString()}. Only array/jsonobject types can be mapped.");
+            } else {
+                dic = source.AsObject()?.Where(p => p.Value is JsonValue)?.ToDictionary(p => p.Key, q => q.Value?.GetValue<object>()); //works only for jsonvalue and not for json array (objects) . Getvalue<string> will fail if we try to get a bool "True" as string. so use only getvalue<object>
+            }
             Map(dic, ref target, comparison_method, typeParser);
         }
 
