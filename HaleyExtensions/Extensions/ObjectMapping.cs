@@ -206,6 +206,13 @@ namespace Haley.Utils
             }
         }
 
+        public static TTarget MapProperties<TSource, TTarget>(this TSource source, MappingInfo mapping_info = default(MappingInfo))
+           where TSource : class
+           where TTarget : class {
+            var target = default(TTarget);
+            return source.MapProperties(target, mapping_info);
+        }
+
         public static TTarget MapProperties<TSource, TTarget>(this TSource source, TTarget target, MappingInfo mapping_info = default(MappingInfo))
         where TSource : class
         where TTarget : class {
