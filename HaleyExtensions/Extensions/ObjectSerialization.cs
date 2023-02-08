@@ -19,6 +19,7 @@ namespace Haley.Utils
         { 
             WriteIndented = true ,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            IncludeFields= true ,
         };
 
         private static void EnsureDefaultJsonConverters(ref JsonSerializerOptions options)
