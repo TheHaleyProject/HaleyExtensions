@@ -17,16 +17,30 @@ namespace Haley.Utils
 {
     public static class DataTableMapping {
 
-        public static IEnumerable<ExpandoObject> Map(this DataTable source) {
+        //Expando/Dynamic objects are internal. So they will not be visible to items outside of this library.
+        //public static IEnumerable<ExpandoObject> Convert(this DataTable source) {
+        //    if (source == null) yield break;
+        //    foreach (var row in source.Rows) {
+        //        if (!(row is DataRow dr)) continue;
+        //        var expObj = new ExpandoObject();
+        //        for (int i = 0; i < source.Columns.Count; i++) {
+        //            var col = source.Columns[i];
+        //            (expObj as IDictionary<string, object>).Add(col.ColumnName, dr.ItemArray[i]);
+        //        }
+        //        yield return expObj; //Don't yield for each column.. Yield only after all columns of one row is filled.
+        //    }
+        //}
+
+        public static IEnumerable<Dictionary<string,object>> Convert(this DataTable source) {
             if (source == null) yield break;
             foreach (var row in source.Rows) {
                 if (!(row is DataRow dr)) continue;
-                var expObj = new ExpandoObject();
+                var rowDic = new Dictionary<string, object>();
                 for (int i = 0; i < source.Columns.Count; i++) {
                     var col = source.Columns[i];
-                    (expObj as IDictionary<string, object>).Add(col.ColumnName, dr.ItemArray[i]);
-                    yield return expObj;
+                    rowDic.Add(col.ColumnName, dr.ItemArray[i]);
                 }
+                 yield return rowDic; //Don't yield for each column.. Yield only after all columns of one row is filled.
             }
         }
 
