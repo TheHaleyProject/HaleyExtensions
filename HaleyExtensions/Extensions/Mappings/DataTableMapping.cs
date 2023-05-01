@@ -1,5 +1,6 @@
 ﻿using Haley.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -15,6 +16,20 @@ using System.Dynamic;
 namespace Haley.Utils
 {
     public static class DataTableMapping {
+
+        public static IEnumerable<ExpandoObject> Map(this DataTable source) {
+            if (source == null) yield break;
+            foreach (var row in source.Rows) {
+                if (!(row is DataRow dr)) continue;
+                var expObj = new ExpandoObject();
+                for (int i = 0; i < source.Columns.Count; i++) {
+                    var col = source.Columns[i];
+                    (expObj as IDictionary<string, object>).Add(col.ColumnName, dr.ItemArray[i]);
+                    yield return expObj;
+                }
+            }
+        }
+
         public static IEnumerable<TTarget> Map<TTarget>(this DataTable source,MappingInfo mapping_info = default(MappingInfo)) where TTarget : class, new() {
             var dataCols = source.Columns.Cast<DataColumn>().Select(p => p.ColumnName)?.ToList(); //All the column names of the datarow.
             var targetProps = (typeof(TTarget))
@@ -30,6 +45,7 @@ namespace Haley.Utils
                 foreach (var prop in targetProps) {
                     MapSingleProp(row, prop, ref target, mapping_info, dataCols); //Sending datacols to save processing time.
                 }
+                //yield return target; //WHEN USING IENUMERABLE, YEILD RETURN SHOULD BE USED, SO THAT IT CAN BE ENUMERATED ONE BY ONE.. TODO: FIX LATER.
                 _targets.Add(target);
             }
 

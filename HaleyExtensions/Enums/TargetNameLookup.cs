@@ -1,12 +1,11 @@
-﻿using System;
-
-namespace Haley.Enums
+﻿namespace Haley.Enums
 {
-    public enum TargetNameLookup {
-          AttributesAndMappingInfo,
-          AttributesOnly,
-          MappingInfoOnly,
-          OtherNameAttributeOnly,
-          JsonPropNameAttributeOnly
+    public enum TargetNameLookup
+    {
+        AttributesAndMappingInfo,
+        AttributesOnly,
+        MappingInfoOnly,
+        OtherNameAttributeOnly,
+        JsonPropNameAttributeOnly
     }
 }

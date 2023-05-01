@@ -22,7 +22,7 @@
 		  <AssemblyVersion>2.0.1.0</AssemblyVersion>
 		  <FileVersion>2.0.1.0</FileVersion>
 		  <PackageTags>IOC, DependencyInjection, DI</PackageTags>
-		  <Version>2.1.16</Version>
+		  <Version>2.1.17</Version>
 		  <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		  <Configurations>Debug;Release;Debug_Net6</Configurations>
 	</PropertyGroup>
@@ -38,8 +38,8 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-	  <PackageReference Include="protobuf-net" Version="3.1.17" />
-	  <PackageReference Include="System.Text.Json" Version="6.0.5" />
+	  <PackageReference Include="protobuf-net" Version="3.2.16" />
+	  <PackageReference Include="System.Text.Json" Version="7.0.2" />
 	</ItemGroup>
 	<Import Project="$(SolutionDir)ProjectReferences_$(SolutionName).txt" Condition="Exists('$(SolutionDir)ProjectReferences_$(SolutionName).txt')" />
 	<Choose>
