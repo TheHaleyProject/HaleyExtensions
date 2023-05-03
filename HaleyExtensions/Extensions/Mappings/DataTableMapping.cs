@@ -38,7 +38,11 @@ namespace Haley.Utils
                 var rowDic = new Dictionary<string, object>();
                 for (int i = 0; i < source.Columns.Count; i++) {
                     var col = source.Columns[i];
-                    rowDic.Add(col.ColumnName, dr.ItemArray[i]);
+                    var colValue = dr.ItemArray[i];
+                    if (colValue is System.DBNull || colValue.ToString() == "{}") {
+                        colValue = string.Empty;
+                    }
+                    rowDic.Add(col.ColumnName, colValue);
                 }
                  yield return rowDic; //Don't yield for each column.. Yield only after all columns of one row is filled.
             }
