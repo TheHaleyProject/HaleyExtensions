@@ -1,7 +1,9 @@
 ﻿using Haley.Enums;
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 
 namespace Haley.Utils
@@ -21,6 +23,7 @@ namespace Haley.Utils
                 return source.PadLeft(pad_left, character).PadRight(length, character);
             }
         }
+
         public static bool IsBase64(this string input)
         {
             if (string.IsNullOrEmpty(input) || input.Length % 4 != 0
@@ -36,6 +39,28 @@ namespace Haley.Utils
                 return false;
             }
         }
+
+        /// <summary>
+        /// When a base64 string is provided as input, it will replace the "/ + = " signs.
+        /// </summary>
+        /// <returns> if input is not base64, it will return same input. Else it will return sanitized value.</returns>
+        public static string SanitizeJWT(this string input) {
+            if (!input.IsBase64()) return input;
+            string result = input.Replace('+', '-').Replace('/', '_').Replace("=", "");
+            return result;
+        }
+
+        public static string DeSanitizeJWT(this string input) {
+            //this cannot be base 64
+            if (input.IsBase64()) return input;
+            string result = input.Trim().Replace('_', '/').Replace('-', '+');
+            switch(result.Length % 4) {
+                case 2: result += "=="; break; //add two equl signs. so we have 4 character.
+                case 3: result += "="; break; //add one equal sign. so we have 4 character.
+            }
+            return result;
+        }
+
         public static string ToNumber(this string input)
         {
             string numbered_key = string.Empty;
