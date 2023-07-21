@@ -15,49 +15,61 @@ namespace Haley.Utils
 {
     public static class JsonNodeMapping {
 
-        public static IEnumerable<TTarget> Map<TTarget>(this JsonArray source, MappingInfo mapping_info = default(MappingInfo),FlattenInfo flatten_info = default(FlattenInfo)) where TTarget : class, new() {
+        public static IEnumerable<TTarget> MapArray<TTarget>(this JsonNode source, MappingInfo mapping_info = default(MappingInfo),FlattenInfo flatten_info = default(FlattenInfo)) where TTarget : class, new() {
 
-            if (source == null ||!(source is JsonArray)) return null;
+           return source.MapArray(typeof(TTarget), mapping_info, flatten_info)?.ChangeEnumerableType(typeof(TTarget)) as IEnumerable<TTarget>;
+        }
+        public static IEnumerable<object> MapArray(this JsonNode source, Type target_type, MappingInfo mapping_info = default(MappingInfo), FlattenInfo flatten_info = default(FlattenInfo)) {
 
-            List<TTarget> _targets = new List<TTarget>();
-            foreach (var item in source) {
-                TTarget _target = new TTarget();
-                item.Map(ref _target, mapping_info,flatten_info);
-                _targets.Add(_target);
+            if (source == null || !(source is JsonArray)) return null;
+            JsonArray jarr = source.AsArray();
+            //If TT is a direct type, get it, else, get the generic argument type
+            List<object> _targets = new List<object>();
+            foreach (var item in jarr) {
+                var target = Activator.CreateInstance(target_type); 
+                if (target.IsList()) throw new ArgumentException("For mapping an array to an enumerable, the target type should be the generic argument type and not a type of list.");
+                item.Map(ref target, mapping_info, flatten_info);
+                _targets.Add(target);
             }
             return _targets;
         }
 
-        public static void Map<TTarget>(this JsonNode source, out object result, MappingInfo mapping_info = default(MappingInfo), FlattenInfo flatten_info = default(FlattenInfo)) where TTarget : class, new() {
-
-            //If it is not an array, then the target is of type "TTarget", if not, then target is of type IEnumberable<TTarget>
-            result = null;
-            if (source == null) return;
-            if (source is JsonArray) {
-                result = source.AsArray()?.Map<TTarget>(mapping_info, flatten_info); //Only for direct call by clients
-            } else {
-
-                TTarget target = new TTarget();
-                if (target == null) return;
-                source.Map<TTarget>(ref target, mapping_info, flatten_info); //Lets start with 0 current-level;
-                result = target;
-            }
-        }
-
         public static TTarget Map<TTarget>(this JsonNode source, MappingInfo mapping_info = default(MappingInfo), FlattenInfo flatten_info = default(FlattenInfo))
             where TTarget : class, new() {
-            TTarget target = new TTarget();
-            Map(source, ref target, mapping_info, flatten_info);
-            return target;
+            var result = source.Map(typeof(TTarget), mapping_info, flatten_info);
+            //if incoming expectationg is a list. change the type.
+            if (typeof(TTarget).IsList()) {
+                //expectation is a list output
+                return result.ChangeType<TTarget>();
+            }
+            return  result as TTarget;
         }
 
-        public static void Map<TTarget>(this JsonNode source, ref TTarget target, MappingInfo mapping_info = default(MappingInfo), FlattenInfo flatten_info = default(FlattenInfo)) where TTarget : class, new() {
-            if (source == null) return;
+        public static object Map(this JsonNode source, Type target_type, MappingInfo mapping_info = default(MappingInfo), FlattenInfo flatten_info = default(FlattenInfo)) {
+            object result = Activator.CreateInstance(target_type);
+            source.Map(ref result, mapping_info, flatten_info);
+            return result;
+        }
+
+        public static void Map(this JsonNode source, ref object target, MappingInfo mapping_info = default(MappingInfo), FlattenInfo flatten_info = default(FlattenInfo)) {
+
+            if (source == null || target == null) return;
+            if (source is JsonArray) {
+
+                Type target_type = target.GetType();
+                if (target.IsList()) {
+                    target_type = target.GetType().GetGenericArguments()[0];
+                }
+                //If source is array, then expected return object should be a list.
+                target = source.AsArray()?.MapArray(target_type, mapping_info, flatten_info); //Only for direct call by clients
+                return;
+            } 
+
             //single node will fail.. source (Jsonnode) has to be jsonobject (like an array), if source is a jsonvalue,then "AsObject" will throw exception
-            List<string> mapped_keys = new List<string>(); 
+            List<string> mapped_keys = new List<string>();
             var dic = PopulateValueDictionary(source, ref mapped_keys, 0, flatten_info); //populate as is based on flatten info
             if (dic == null) return;
-            ObjectMapping.Map(dic, ref target,mapping_info);
+            ObjectMapping.Map(dic, ref target, mapping_info);
         }
 
         public static string GetNodePath(this JsonNode source) {

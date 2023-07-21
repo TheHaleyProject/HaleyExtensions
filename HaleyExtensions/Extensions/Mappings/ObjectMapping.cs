@@ -13,18 +13,27 @@ using System.Diagnostics.SymbolStore;
 
 namespace Haley.Utils
 {
-    public static class ObjectMapping
-    {
-        public static TTarget Map<TTarget>(this Dictionary<string, object> source, MappingInfo mapping_info = default(MappingInfo)) where TTarget : class, new() {
-            TTarget target = new TTarget(); //new target
-            Map(source, ref target, mapping_info);
-            return target;
+    public static class ObjectMapping {
+        public static void Map<TTarget>(this Dictionary<string, object> source, ref TTarget target, MappingInfo mapping_info = default(MappingInfo)) where TTarget : class, new() {
+            if (source == null || source.Count == 0) return; //dont' process
+            object targetObj = target;
+            target = source.Map(ref targetObj, mapping_info) as TTarget;
         }
 
-        public static void Map<TTarget>(this Dictionary<string, object> source,ref TTarget target, MappingInfo mapping_info = default(MappingInfo)) where TTarget: class, new() {
-            if (source == null || source.Count == 0) return; //dont' process
+        public static TTarget Map<TTarget>(this Dictionary<string, object> source, MappingInfo mapping_info = default(MappingInfo)) where TTarget : class, new() {
+            return Map(source, typeof(TTarget), mapping_info) as TTarget;
+        }
 
-            var targetProps = (typeof(TTarget))
+        public static object Map(this Dictionary<string, object> source, Type target_type, MappingInfo mapping_info = default(MappingInfo)) {
+            var target = Activator.CreateInstance(target_type);
+            target = Map(source, ref target, mapping_info);
+            return target;
+        }
+        
+        public static object Map(this Dictionary<string, object> source,ref object target, MappingInfo mapping_info = default(MappingInfo)) {
+            if (source == null || source.Count == 0) return target; //dont' process
+
+            var targetProps = target.GetType()
                 .GetProperties()? //Getall props
                 .RemoveIgnored(((mode) => mode == IgnoreMappingMode.Both || mode == IgnoreMappingMode.ToThisObject), mapping_info.IncludeIgnoredMembers)
                 //.Where(p =>
@@ -34,18 +43,23 @@ namespace Haley.Utils
             foreach (var prop in targetProps) {
                 MapSingleProp(source, prop,ref target, mapping_info); //Sending datacols to save processing time.
             }
+            return target;
         }
-
         public static TTarget MapProperties<TSource, TTarget>(this TSource source, MappingInfo mapping_info = default(MappingInfo))
            where TSource : class
            where TTarget : class {
-            var target = default(TTarget);
+            return source.MapProperties(typeof(TTarget), mapping_info) as TTarget;
+        }
+
+        public static object MapProperties<TSource>(this TSource source, Type target_type, MappingInfo mapping_info = default(MappingInfo))
+           where TSource : class {
+            var target = Activator.CreateInstance(target_type);
             return source.MapProperties(target, mapping_info);
         }
 
-        public static TTarget MapProperties<TSource, TTarget>(this TSource source, TTarget target, MappingInfo mapping_info = default(MappingInfo))
+        public static object MapProperties<TSource>(this TSource source, object target, MappingInfo mapping_info = default(MappingInfo))
         where TSource : class
-        where TTarget : class {
+        {
             try {
                 //Sometimes target can be null. We can set it default.
                 if (target == null || source == null) {
@@ -67,7 +81,7 @@ namespace Haley.Utils
 
                 foreach (var targetProp in targetProperties) {
                     //Getting only for the target (not for the source).
-                    var possibleNameMatches = PopulateTargetNames(targetProp,mapping_info);
+                    var possibleNameMatches = PopulateTargetNames(targetProp, mapping_info);
                     if (possibleNameMatches == null || possibleNameMatches.Count() == 0) continue; //Don't proceed with processing 
                     object targetValue = null;
 
@@ -108,7 +122,27 @@ namespace Haley.Utils
                 return null;
             }
         }
+        static object MapSingleProp(this Dictionary<string, object> source, PropertyInfo prop,ref object target, MappingInfo mapping_info) {
+            var possibleNameMatches = PopulateTargetNames(prop, mapping_info);
+            if (possibleNameMatches == null || possibleNameMatches.Count() == 0) return target; //Don't proceed with this target property
 
+            //Now we need to find out if the source has any value with either the original prop name or the alternative name. If it is found and it matches, we get that value.
+
+            foreach (var _name in possibleNameMatches) {
+                var dic_key = source.Keys.FirstOrDefault(p => p.Equals(_name, mapping_info.ComparisonMethod));
+                //REMEMBER KEY IS VERY IMPORTANT IN DICTIONARY. IT IS CASE SENSITIVE
+                if (!string.IsNullOrWhiteSpace(_name)
+                    && !string.IsNullOrWhiteSpace(dic_key)) {
+                    //if a match is found.
+                    var sourceValue = source[dic_key];
+                    if (sourceValue != null) {
+                        FillSingleProp(prop, target, sourceValue, mapping_info);
+                        break;//Don't check other possible names.
+                    }
+                }
+            }
+            return target;
+        }
         internal static object FillSingleProp(PropertyInfo prop,object target, object source_value, MappingInfo mapping_info = default(MappingInfo)) {
             try {
                 Type _propType = prop.PropertyType;
@@ -255,26 +289,6 @@ namespace Haley.Utils
             }
            
             return possibleNameMatches?.Where(p=> !string.IsNullOrWhiteSpace(p))?.Distinct()?.ToList(); //remove nulls and empty
-        }
-        private static void MapSingleProp<TTarget>(this Dictionary<string, object> source, PropertyInfo prop,ref TTarget target, MappingInfo mapping_info) where TTarget:class, new() {
-            var possibleNameMatches = PopulateTargetNames(prop,mapping_info);
-            if (possibleNameMatches == null || possibleNameMatches.Count() == 0) return; //Don't proceed with this target property
-
-            //Now we need to find out if the source has any value with either the original prop name or the alternative name. If it is found and it matches, we get that value.
-
-            foreach (var _name in possibleNameMatches) {
-                var dic_key = source.Keys.FirstOrDefault(p => p.Equals(_name, mapping_info.ComparisonMethod));
-                //REMEMBER KEY IS VERY IMPORTANT IN DICTIONARY. IT IS CASE SENSITIVE
-                if (!string.IsNullOrWhiteSpace(_name)
-                    && !string.IsNullOrWhiteSpace(dic_key)) {
-                    //if a match is found.
-                    var sourceValue = source[dic_key];
-                    if (sourceValue != null) {
-                        FillSingleProp(prop,target, sourceValue, mapping_info);
-                        break;//Don't check other possible names.
-                    }
-                }
-            }
         }
         internal static IEnumerable<PropertyInfo> RemoveIgnored(this IEnumerable<PropertyInfo> source, Func<IgnoreMappingMode, bool> ignoreValidator,bool should_bypass) {
             try {
