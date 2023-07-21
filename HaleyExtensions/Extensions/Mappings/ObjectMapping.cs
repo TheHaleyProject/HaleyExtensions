@@ -57,6 +57,13 @@ namespace Haley.Utils
             return source.MapProperties(target, mapping_info);
         }
 
+        public static TTarget MapProperties<TSource,TTarget>(this TSource source, TTarget target, MappingInfo mapping_info = default(MappingInfo))
+        where TSource : class
+        where TTarget : class{
+            object newTarget = target;
+            return source.MapProperties(newTarget,mapping_info) as TTarget;
+        }
+
         public static object MapProperties<TSource>(this TSource source, object target, MappingInfo mapping_info = default(MappingInfo))
         where TSource : class
         {
