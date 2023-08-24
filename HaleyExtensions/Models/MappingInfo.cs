@@ -12,6 +12,7 @@ namespace Haley.Models {
         //Contains information for mapping.
         public Dictionary<string, List<string>> TargetAlternateNames => new Dictionary<string, List<string>>();
         public List<string> IgnoredTargetNames { get; set; }
+
         public StringComparison ComparisonMethod { get; set; }
         public ValueConverter Converter { get; set; }
         public TargetNameLookup NameMapping { get; set; }
@@ -19,7 +20,7 @@ namespace Haley.Models {
 
         public MappingInfo(TargetNameLookup name_mapping) : this(null, StringComparison.InvariantCulture,name_mapping) {
         }
-        public MappingInfo(StringComparison comparison = StringComparison.InvariantCulture) : this(null, comparison, TargetNameLookup.AttributesAndMappingInfo) {
+        public MappingInfo(StringComparison comparison) : this(null, comparison, TargetNameLookup.AttributesAndMappingInfo) {
         }
         public MappingInfo(ValueConverter converter):this(converter,StringComparison.InvariantCulture,TargetNameLookup.AttributesAndMappingInfo) {
         }
