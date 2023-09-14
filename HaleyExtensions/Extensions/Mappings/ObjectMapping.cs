@@ -162,75 +162,74 @@ namespace Haley.Utils
                     }
                 }
 
+                if (source_value == null) {
+                    prop.SetValue(source_value, null, null); //Directly set the input source_value as the property value.
+                    return target;
+                }
+
                 //STRING
                 if (_propType == typeof(string)) {
                     prop.SetValue(target, source_value.ToString().Trim(), null);
                 }
                 //BOOL
                 else if (_propType == typeof(bool) || _propType == typeof(bool?)) {
-                    if (source_value == null) {
-                        prop.SetValue(source_value, null, null);
-                    } else {
-                        bool? boolval = null;
+                    bool? boolval = null;
 
-                        if (bool.TryParse(source_value.ToString(), out bool local_val)) {
-                            //If successfully converted.
-                            boolval = local_val;
+                    if (bool.TryParse(source_value.ToString(), out bool local_val)) {
+                        //If successfully converted.
+                        boolval = local_val;
+                    }
+                    if (boolval == null) {
+                        switch (source_value.ToString().ToLower()) {
+                            case "1":
+                            case "true":
+                            case "okay":
+                            case "success":
+                            case "y":
+                            case "t":
+                            case "yes":
+                                boolval = true;
+                                break;
+                            case "0":
+                            case "false":
+                            case "notokay":
+                            case "fail":
+                            case "n":
+                            case "f":
+                            case "no":
+                                boolval = false;
+                                break;
                         }
-                        if (boolval == null) {
-                            switch (source_value.ToString().ToLower()) {
-                                case "1":
-                                case "true":
-                                case "okay":
-                                case "success":
-                                case "y":
-                                case "t":
-                                case "yes":
-                                    boolval = true;
-                                    break;
-                                case "0":
-                                case "false":
-                                case "notokay":
-                                case "fail":
-                                case "n":
-                                case "f":
-                                case "no":
-                                    boolval = false;
-                                    break;
-                            }
-                        }
+                    }
 
-                        if (boolval != null) {
-                            prop.SetValue(target, boolval, null);
-                        }
+                    if (boolval != null) {
+                        prop.SetValue(target, boolval, null);
                     }
                 }
                 //INT
                 else if (_propType == typeof(int)
                          || _propType == typeof(int?)) {
-                    if (source_value == null) {
-                        prop.SetValue(source_value, null, null);
-                    } else {
-                        int.TryParse(source_value.ToString(), out int _int_value);
-                        prop.SetValue(target, _int_value, null);
-                    }
+                    int.TryParse(source_value.ToString(), out int _int_value);
+                    prop.SetValue(target, _int_value, null);
                 }
                 //DOUBLE
                 else if (_propType == typeof(double) || _propType == typeof(double?)) {
-                    if (source_value == null) {
-                        prop.SetValue(source_value, null, null);
-                    } else {
-                        double.TryParse(source_value.ToString(), out double dbl_value);
-                        prop.SetValue(target, dbl_value, null);
-                    }
+                    double.TryParse(source_value.ToString(), out double dbl_value);
+                    prop.SetValue(target, dbl_value, null);
                 }
                 //LONG
                 else if (_propType == typeof(long) || _propType == typeof(long?)) {
-                    if (source_value == null) {
-                        prop.SetValue(source_value, null, null);
-                    } else {
-                        long.TryParse(source_value.ToString(), out long lng_value);
-                        prop.SetValue(target, lng_value, null);
+                    long.TryParse(source_value.ToString(), out long lng_value);
+                    prop.SetValue(target, lng_value, null);
+                }
+                //ENUM
+                else if (typeof(Enum).IsAssignableFrom(_propType)) {
+                    foreach (var item in Enum.GetValues(_propType)) {
+                        var isMatch = item?.ToString().Equals(source_value.ToString(), StringComparison.OrdinalIgnoreCase);
+                       if (isMatch.HasValue && isMatch.Value){
+                            prop.SetValue(target, item, null);
+                            break;
+                        }
                     }
                 }
                 //DEFAULT

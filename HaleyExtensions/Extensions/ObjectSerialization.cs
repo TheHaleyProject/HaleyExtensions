@@ -13,13 +13,10 @@ using System.Linq;
 
 namespace Haley.Utils
 {
-    public static class ObjectSerialization
-    {
-        private static JsonSerializerOptions commonOptions = new JsonSerializerOptions() 
-        { 
-            WriteIndented = true ,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-            IncludeFields= true ,
+    public static class ObjectSerialization {
+        private static JsonSerializerOptions commonOptions = new JsonSerializerOptions() {
+            WriteIndented = true,
+            IncludeFields = true,
         };
 
         private static void EnsureDefaultJsonConverters(ref JsonSerializerOptions options)
