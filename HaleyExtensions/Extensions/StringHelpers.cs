@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace Haley.Utils
@@ -69,11 +70,44 @@ namespace Haley.Utils
 
         public static bool IsValidJson(this string json) {
             try {
-                JsonDocument.Parse(json); return true;
-                } catch (Exception ex) {
-                return false;
+                if (string.IsNullOrWhiteSpace(json)) return false;
+                string jsonContent = json;
+                if (json.IsArray()) {
+                    jsonContent = json.Substring(1, json.Length - 2).Trim();
                 }
+
+                if (jsonContent.StartsWith("{") && jsonContent.EndsWith("}")) return true;
+                //JsonDocument.Parse(json.Trim()); return true; //too much time consuming.
+            } catch (Exception ex) {
+                }
+            return false;
+        }
+
+        static bool IsArray(this string json) {
+            //Could be json array or a normal string array
+            try {
+                var jsonStr = json.Trim();
+                if (!(jsonStr.StartsWith("[") && jsonStr.EndsWith("]"))) return false;
+                return true;
+            } catch (Exception) {
+                return false;
             }
+        }
+
+        static bool IsStringArray(this string json,out string[] result) {
+            result = null;
+            try {
+                var jsonStr = json.Trim();
+                if (!(jsonStr.StartsWith("[") && jsonStr.EndsWith("]"))) return false;
+                //It looks like it is a Json array. Lets check the content and see if it starts with curly braces.
+                var arrayContent = jsonStr.Substring(1, jsonStr.Length - 2); //Removing first and last letter.
+                if (arrayContent.StartsWith("{") && arrayContent.EndsWith("}")) return false;
+                result = arrayContent.Split(',');
+                return true; 
+            } catch (Exception ex) {
+                return false;
+            }
+        }
 
         public static string PadCenter(this string source, int length, char character = '\u0000') {
             int space_available = length - source.Length;
@@ -103,9 +137,9 @@ namespace Haley.Utils
         /// <param name="result">output converted result</param>
         /// <param name="searchlevel">0 - Makes search all levels.</param>
         /// <returns></returns>
-        public static bool ToDictionary(string jsonInput, out List<Dictionary<string, object>> result, int searchlevel = 1) {
+        public static bool JsonToDictionary(this string jsonInput, out object result, int searchlevel = 1, string[] ignoreKeys = null) {
             if (searchlevel < 0) searchlevel = 0;
-            return ToDictionary(jsonInput, searchlevel, 1, out result); //Current search level is always 1.
+            return JsonToDictionary(jsonInput, searchlevel, 1,ignoreKeys, out result); //Current search level is always 1.
             }
 
         public static string ToNumber(this string input) {
@@ -117,39 +151,38 @@ namespace Haley.Utils
             }
             return numbered_key;
         }
-        //static bool IsJsonArray(this string json)
-        //{
-        //    try
-        //    {
-        //    } catch (Exception)
-        //    {
 
-        static void DeepConvertJson(Dictionary<string, object> dic) {
-            string[] localkeys = dic.Keys.ToArray(); ;
+        static void DeepConvertJson(Dictionary<string, object> dic,int searchlevel,int currentlevel, string[] ignoreKeys) {
 
+            if (dic == null || dic.Count < 1) return;
+            //Check for levels
+            if (searchlevel != 0) {
+                //Compare with currentlevel
+                if (currentlevel > searchlevel) return; //We already reached the search end.
+            }
 
-            //Loop each item to check if value is json.
-            foreach (var key in localkeys) {
-                if (dic.ContainsKey(key) && dic[key] != null) {
-                    //Confirm if the value is a string first.
-                    try {
-                        var valueStr = dic[key].ToString();
-                        if (!(valueStr.StartsWith("{") || valueStr.StartsWith("["))) continue; //No need to change this dictionary value.
-                        if (valueStr.Trim().StartsWith("{") && valueStr.Trim().EndsWith("}")) {
-                            dic[key] = JsonSerializer.Deserialize<Dictionary<string, object>>(dic[key].ToString());
-                            } else if (valueStr.Trim().StartsWith("[") && valueStr.Trim().EndsWith("]")) {
-                            //dic[key] =
-                            }
-
-
-                        } catch (Exception ex) {
-                        //log it
+            foreach (var item in dic) {
+                try {
+                    if (ignoreKeys != null && ignoreKeys.Contains(item.Key, StringComparer.OrdinalIgnoreCase)) continue; //Do not try to change this value.
+                    var valueStr = item.Value?.ToString();
+                    if (valueStr == null || !IsValidJson(valueStr)) continue;
+                    //Now if this is a json but not able to be converted, then there is a possibility, this could be a string array
+                    //If this is a string array, convert and replace the value, else proceed
+                    if (valueStr.IsStringArray(out var strArray)) {
+                        dic[item.Key] = strArray;
                         continue;
-                        }
-
                     }
+
+                    //We have got a valid json, which is not a json array as well. Let's proceed to convert it.
+                    if (valueStr.JsonToDictionary(searchlevel,currentlevel, ignoreKeys, out var result)) {
+                        dic[item.Key] = result;
+                    }
+                } catch (Exception ex) {
+                    //log it
+                    continue;
                 }
             }
+        }
 
         //    }
         //}
@@ -160,38 +193,42 @@ namespace Haley.Utils
         /// <param name="result">output converted result</param>
         /// <param name="searchlevel">0 - Makes search all levels.</param>
         /// <returns></returns>
-        static bool ToDictionary(string jsonInput, int searchlevel,int currentlevel, out List<Dictionary<string, object>> result)
+        static bool JsonToDictionary(this string jsonInput, int searchlevel,int currentlevel, string[] ignoreKeys, out object result)
         {
             //Input could be json array or single json.
-            result = new List<Dictionary<string, object>>();
+            result = null;
             if (jsonInput == null) return false;
             
             try
             {
                 var jsonStr = jsonInput.Trim();
-                if (string.IsNullOrWhiteSpace(jsonStr) || !jsonStr.IsValidJson()) return false;
+                if (string.IsNullOrWhiteSpace(jsonStr) || !jsonStr.IsValidJson()) return false;  //For invalid jsons do not proceed further
 
-                if (jsonStr.StartsWith("[") && jsonStr.EndsWith("]"))
+                if (IsArray(jsonStr))
                 {
-                    //Even if it is a normal value, it will 
+                    //Even if it is an array value, it will return as valid json.
+                    //check if this is a json array
+                    if (jsonStr.IsStringArray(out _)) return false; //no need to process string array.
                     //Array
                     var jsonStrList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonStr);
                     if (jsonStrList != null && jsonStrList is List<Dictionary<string, object>> inputList)
                     {
+                        //Current level is already converted to inputlist
                         foreach (var dicLocal in inputList)
                         {
-                            DeepConvertJson(dicLocal, childConvertKeys, forallkeys);
+                            DeepConvertJson(dicLocal,searchlevel,currentlevel+1, ignoreKeys); //We are direclty modifying in the dictionary.
                         }
                         result = inputList;
                     }
                 } else if (jsonStr.StartsWith("{") && jsonStr.EndsWith("}"))
                 {
                     //object
-                    var resultRawDic = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonStr);
-                    if (resultRawDic != null && resultRawDic is Dictionary<string, object> inputDic)
+                    var jsonSingle = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonStr);
+                    if (jsonSingle != null && jsonSingle is Dictionary<string, object> inputDic)
                     {
-                        DeepConvertJson(inputDic, childConvertKeys, forallkeys);
-                        result.Add(inputDic);
+                        //currentlevel is already converted to inputDic
+                        DeepConvertJson(inputDic, searchlevel, currentlevel+1, ignoreKeys);  //We are direclty modifying in the dictionary.
+                        result = inputDic; //Single dictionary
                     }
                 }
 

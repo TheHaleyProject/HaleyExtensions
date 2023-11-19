@@ -6,6 +6,10 @@ using System.Text.Json;
 var jsonArray1 = "[4,3,5,2,2]";
 jsonArray1.IsValidJson();
 
+var jsonArray33 = " [4,3,5,2,2] ";
+jsonArray33.IsValidJson();
+//jsonArray33.IsJsonArray();
+
 try
 {
     var another = jsonArray1.Trim().Substring(1, jsonArray1.Length - 2);
@@ -40,6 +44,3 @@ jsonArray4.IsValidJson();
 
 var jsonArray5 = "{\"mpId\": 1311, \"mpName\": \"md_name\", \"mpDataType\": \"t_string\", \"mpKind\": \"user_value\", \"displayName\": \"Name\", \"isPredefined\": \"1\", \"shId\": \"[4,6,3,3]\", \"displayMpId\": 0, \"dbName\": null, \"tagGroupId\": 0}";
 jsonArray5.IsValidJson();
-
-
-
