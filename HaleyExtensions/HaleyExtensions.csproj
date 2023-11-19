@@ -14,7 +14,7 @@
 		  <IncludeSymbols>true</IncludeSymbols>
 		  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		  <PackageIcon>Haley.png</PackageIcon>
-		  <PackageReleaseNotes>Include fields (private,readonly) when deserializing/serializing json</PackageReleaseNotes>
+		  <PackageReleaseNotes>Added string extensions to convert json to dictionary</PackageReleaseNotes>
 		  <RepositoryUrl>https://github.com/rmsmech/HaleyExtensions</RepositoryUrl>
 		  <RepositoryType>GIT</RepositoryType>
 		  <SignAssembly>true</SignAssembly>
@@ -22,7 +22,7 @@
 		  <AssemblyVersion>2.0.1.0</AssemblyVersion>
 		  <FileVersion>2.0.1.0</FileVersion>
 		  <PackageTags>IOC, DependencyInjection, DI</PackageTags>
-		  <Version>2.1.20</Version>
+		  <Version>2.1.21</Version>
 		  <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		  <Configurations>Debug;Release;Debug_Net6</Configurations>
 	</PropertyGroup>
