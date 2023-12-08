@@ -14,10 +14,22 @@ using System.Linq;
 namespace Haley.Utils
 {
     public static class ObjectSerialization {
-        private static JsonSerializerOptions commonOptions = new JsonSerializerOptions() {
-            WriteIndented = true,
-            IncludeFields = true,
-        };
+        private static JsonSerializerOptions commonOptions = GenerateNewOptions(true);
+
+        public static JsonSerializerOptions GenerateNewOptions(bool include_default_converters = false) {
+            var result = new JsonSerializerOptions() {
+                WriteIndented = true,
+                IncludeFields = true,
+            };
+            if (include_default_converters) EnsureDefaultJsonConverters(ref result);
+            return result;
+        }
+        static JsonSerializerOptions GetOptions(bool generateNew= false) {
+            if (generateNew) {
+                return GenerateNewOptions(true);
+            }
+            return commonOptions;
+        }
 
         private static void EnsureDefaultJsonConverters(ref JsonSerializerOptions options)
         {
@@ -73,7 +85,7 @@ namespace Haley.Utils
 
         public static T FromJson<T>(this string input)
         {
-            return FromJsonInternal<T>(input, commonOptions);
+            return FromJsonInternal<T>(input, GetOptions());
         }
 
         
@@ -83,7 +95,7 @@ namespace Haley.Utils
         }
 
         public static object FromJson(this string input, Type targetType) {
-            return FromJsonInternal(input, commonOptions, targetType);
+            return FromJsonInternal(input, GetOptions(), targetType);
         }
 
         public static object FromJson(this string input, JsonSerializerOptions options,Type targetType)
@@ -93,12 +105,10 @@ namespace Haley.Utils
 
         private static object FromJsonInternal(string input,JsonSerializerOptions option,Type targetType)
         {
-            EnsureDefaultJsonConverters(ref option);
             if (targetType == null) throw new ArgumentException("Targettype cannot be null");
             return JsonSerializer.Deserialize(input, targetType, options: option);
         }
         private static T FromJsonInternal<T>(string input, JsonSerializerOptions option) {
-            EnsureDefaultJsonConverters(ref option);
             return JsonSerializer.Deserialize<T>(input,options: option);
         }
 
@@ -109,8 +119,6 @@ namespace Haley.Utils
         private static string ToJsonInternal(object source, ref JsonSerializerOptions options, List<JsonConverter> converters = null)
         {
             try {
-                EnsureDefaultJsonConverters(ref options);
-
                 try {
                     do {
                         if (converters == null || converters?.Count == 0) break;
@@ -136,7 +144,8 @@ namespace Haley.Utils
         }
         public static string ToJson(this object source,List<JsonConverter> converters = null)
         {
-            return ToJsonInternal(source,ref commonOptions, converters);
+            var options = GetOptions(true);
+            return ToJsonInternal(source,ref options, converters);
         }
         public static string BinarySerialize(this object input)
         {
