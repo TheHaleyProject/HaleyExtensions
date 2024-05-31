@@ -43,13 +43,7 @@
 	</ItemGroup>
 	<Import Project="$(SolutionDir)ProjectReferences_$(SolutionName).txt" Condition="Exists('$(SolutionDir)ProjectReferences_$(SolutionName).txt')" />
 	<Choose>
-		<When Condition="Exists($(HaleyAbstractions))">
-			<ItemGroup>
-				<ProjectReference Include="$(HaleyAbstractions)\HaleyAbstractions.csproj">
-					<Name>HaleyAbstractions</Name>
-				</ProjectReference>
-			</ItemGroup>
-		</When>
+		<When Condition="Exists($(HaleyAbstractions))" />
 		<Otherwise>
 			<ItemGroup>
 				<PackageReference Include="Haley.Abstractions" Version="1.1.4" />
