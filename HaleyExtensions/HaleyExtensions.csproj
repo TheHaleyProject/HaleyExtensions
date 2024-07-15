@@ -39,7 +39,7 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 	  <PackageReference Include="protobuf-net" Version="3.2.16" />
-	  <PackageReference Include="System.Text.Json" Version="7.0.2" />
+	  <PackageReference Include="System.Text.Json" Version="8.0.4" />
 	</ItemGroup>
 	<Import Project="$(SolutionDir)ProjectReferences_$(SolutionName).txt" Condition="Exists('$(SolutionDir)ProjectReferences_$(SolutionName).txt')" />
 	<Choose>
