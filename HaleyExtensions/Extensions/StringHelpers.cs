@@ -68,6 +68,10 @@ namespace Haley.Utils
                 }
             }
 
+        public static bool IsMD5(this string input) {
+            return Regex.IsMatch(input, "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
+        }
+
         public static bool IsValidJson(this string json) {
             try {
                 if (string.IsNullOrWhiteSpace(json)) return false;
