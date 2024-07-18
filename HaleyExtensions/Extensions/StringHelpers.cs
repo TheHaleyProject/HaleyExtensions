@@ -114,13 +114,14 @@ namespace Haley.Utils
             }
         }
 
-        public static string SplitAsPath(this string input, int splitLength, int depth, bool generateZeroDir = true) {
+        public static string SplitAsPath(this string input, int splitLength, int depth, bool generateZeroDir, bool namePadLeft) {
             if (string.IsNullOrWhiteSpace(input)) { throw new ArgumentNullException("Input is empty. Nothing to split."); }
             if (depth < 0) depth = 0; //We cannot have less than 0
             if (splitLength < 1) splitLength = 2; //we need a minimum 1 split.
             List<string> pathBuilder = new List<string>();
+            var wval = Path.GetFileNameWithoutExtension(input); //Just a precaution to exclude extension
 
-            if (input.Length < splitLength + 1 && generateZeroDir) {
+            if (wval.Length < splitLength + 1 && generateZeroDir) {
                 pathBuilder.Add("00"); //Incase we have only 2 characters or a single character.
             }
 
@@ -128,18 +129,26 @@ namespace Haley.Utils
             int currentLevel = 1;
             bool isLastPart = false;
 
-            for (int i = 0; i < input.Length && !isLastPart; i = i + splitLength) {
+            //for number or for hash, we need to ensure that, we need a padding. padding will be with 0. Should the padding happen at the right or left?
+            if (namePadLeft && (wval.Length % splitLength != 0)) {
+                //we need to pad on left.. Currently, we assume that we split by 2.
+                //so add 1 on left.
+                //EVEN SPLIT LENGTH
+                wval = "0" + wval; //FOR EVEN SPLIT, ONE CHARACTER IS ENOUGH.
+            }
+
+            for (int i = 0; i < wval.Length && !isLastPart; i = i + splitLength) {
                 //if i+2 is greater than idString.Length, then we are at the last part.
                 if (depth > 0 && currentLevel > depth) {
                     isLastPart = true; //we will not rerun again.
                 } else {
-                    isLastPart = i + splitLength > input.Length - 1;
+                    isLastPart = i + splitLength > wval.Length - 1;
                 }
 
-                string idPart = isLastPart ? input.Substring(i) : input.Substring(i, splitLength);
+                string idPart = isLastPart ? wval.Substring(i) : wval.Substring(i, splitLength);
                 //Handle last part.
                 if (isLastPart) {
-                    if (idPart.Length < 2) {
+                    if (idPart.Length < 2 && !namePadLeft) { //pad on right end. 
                         //if we have a single character.
                         idPart = idPart.PadLeft(splitLength, '0'); //pad left side with the character to match the split length.
                     }
