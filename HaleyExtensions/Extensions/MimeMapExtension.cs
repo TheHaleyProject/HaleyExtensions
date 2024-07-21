@@ -495,6 +495,7 @@ namespace Haley.Utils
                 {".spx", "audio/ogg"},
                 {".src", "application/x-wais-source"},
                 {".srf", "text/plain"},
+                {".srt", "text/plain"},
                 {".SSISDeploymentManifest", "text/xml"},
                 {".ssm", "application/streamingmedia"},
                 {".sst", "application/vnd.ms-pki.certstore"},
