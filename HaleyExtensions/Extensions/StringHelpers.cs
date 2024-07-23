@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -114,27 +115,25 @@ namespace Haley.Utils
             }
         }
 
-        public static string SplitAsPath(this string input, int splitLength, int depth, bool generateZeroDir, bool namePadLeft) {
+        public static string Separate(this string input, int splitLength, int depth, string delimiter = "\\", bool addPadding = true,  char padChar = '0') {
             if (string.IsNullOrWhiteSpace(input)) { throw new ArgumentNullException("Input is empty. Nothing to split."); }
             if (depth < 0) depth = 0; //We cannot have less than 0
             if (splitLength < 1) splitLength = 2; //we need a minimum 1 split.
+            if (splitLength > 7) splitLength = 7;
             List<string> pathBuilder = new List<string>();
-            var wval = Path.GetFileNameWithoutExtension(input); //Just a precaution to exclude extension
-
-            if (wval.Length < splitLength + 1 && generateZeroDir) {
-                pathBuilder.Add("00"); //Incase we have only 2 characters or a single character.
-            }
+            var wval = Path.GetFileNameWithoutExtension(input)?.Trim()?.Replace(" ",""); //Just a precaution to exclude extension
+            var extension = Path.GetExtension(input);
 
             //Go down until we have reached the desired directory level
             int currentLevel = 1;
             bool isLastPart = false;
 
             //for number or for hash, we need to ensure that, we need a padding. padding will be with 0. Should the padding happen at the right or left?
-            if (namePadLeft && (wval.Length % splitLength != 0)) {
-                //we need to pad on left.. Currently, we assume that we split by 2.
-                //so add 1 on left.
-                //EVEN SPLIT LENGTH
-                wval = "0" + wval; //FOR EVEN SPLIT, ONE CHARACTER IS ENOUGH.
+            if (addPadding ) {
+                var padLength = splitLength - (wval.Length % splitLength);
+                if (padLength != 0) {
+                    wval =  wval.PadLeft(wval.Length + padLength, padChar);
+                }
             }
 
             for (int i = 0; i < wval.Length && !isLastPart; i = i + splitLength) {
@@ -146,18 +145,15 @@ namespace Haley.Utils
                 }
 
                 string idPart = isLastPart ? wval.Substring(i) : wval.Substring(i, splitLength);
-                //Handle last part.
-                if (isLastPart) {
-                    if (idPart.Length < 2 && !namePadLeft) { //pad on right end. 
-                        //if we have a single character.
-                        idPart = idPart.PadLeft(splitLength, '0'); //pad left side with the character to match the split length.
-                    }
-                    //idPart = idPart + "f"; //we need the suffix F to be added to the lastPart, so that we can easily identify it as a file.
+
+                if (isLastPart && !string.IsNullOrWhiteSpace(extension)){
+                    idPart = idPart + extension;
                 }
                 pathBuilder.Add(idPart);
                 currentLevel++; //add one more depth to the directory desired.
             }
-            return Path.Combine(pathBuilder.ToArray());
+            //return Path.Combine(pathBuilder.ToArray());
+            return string.Join(delimiter, pathBuilder.ToArray());
         }
 
         public static string PadCenter(this string source, int length, char character = '\u0000') {
