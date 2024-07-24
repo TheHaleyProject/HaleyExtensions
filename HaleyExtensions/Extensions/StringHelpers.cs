@@ -130,7 +130,7 @@ namespace Haley.Utils
             //for number or for hash, we need to ensure that, we need a padding. padding will be with 0. Should the padding happen at the right or left?
             if (addPadding ) {
                 var padLength = splitLength - (wval.Length % splitLength);
-                if (padLength != 0) {
+                if (padLength != 0 && padLength != splitLength) {
                     wval =  wval.PadLeft(wval.Length + padLength, padChar);
                 }
             }
