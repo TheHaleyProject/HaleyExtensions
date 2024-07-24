@@ -12,7 +12,7 @@ namespace Haley.Models {
         //Contains information for mapping.
         public Dictionary<string, List<string>> TargetAlternateNames => new Dictionary<string, List<string>>();
         public List<string> IgnoredTargetNames { get; set; }
-
+        //public bool IncludePrivateProperties { get; set; } 
         public StringComparison ComparisonMethod { get; set; }
         public ValueConverter Converter { get; set; }
         public TargetNameLookup NameMapping { get; set; }
@@ -31,6 +31,7 @@ namespace Haley.Models {
             Converter = converter;
             NameMapping = name_mapping;
             IncludeIgnoredMembers = false;
+            //IncludePrivateProperties = false;
         }
     }
 }
