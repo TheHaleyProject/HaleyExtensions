@@ -1,5 +1,4 @@
-﻿using ProtoBuf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -20,6 +19,8 @@ namespace Haley.Utils
             var result = new JsonSerializerOptions() {
                 WriteIndented = true,
                 IncludeFields = true,
+                IgnoreReadOnlyFields = false,
+                IgnoreReadOnlyProperties = false,
             };
             if (include_default_converters) EnsureDefaultJsonConverters(ref result);
             return result;
@@ -147,82 +148,79 @@ namespace Haley.Utils
             var options = GetOptions(true);
             return ToJsonInternal(source,ref options, converters);
         }
-        public static string BinarySerialize(this object input)
-        {
-            string result = null;
-            try
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    bf.Serialize(ms, input);
-                    result = Convert.ToBase64String(ms.ToArray());
-                }
-                return result;
 
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-        public static object BinaryDeserialize(this string input)
-        {
-            object result = null;
-            try
-            {
-                using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(input)))
-                {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    result = bf.Deserialize(ms);
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-        public static T BinaryDeserialize<T>(this string input)
-        {
-            return  (T)input.BinaryDeserialize();
-        }
-        
-        public static string ProtoSerialize(this object input)
-        {
-            string result = null;
-            try
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    Serializer.Serialize(ms, input);
-                    result = Convert.ToBase64String(ms.ToArray());
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-        public static T ProtoDeserialize<T>(this string input)
-        {
-            return (T)ProtoDeserialize(input, typeof(T));
+       
+
+        public static T DeepClone<T>(this T obj) {
+            return obj.ToJson().FromJson<T>();
+            //var bytes = JsonSerializer.SerializeToUtf8Bytes(obj, commonOptions);
+            //return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(bytes) ,commonOptions);
+            //return obj.ProtoSerialize().ProtoDeserialize<T>();
         }
 
-        public static object ProtoDeserialize(this string input,Type targetType)
-        {
-            try
-            {
-                using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(input)))
-                {
-                    return Serializer.Deserialize(targetType,ms);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+        #region Abandoned
+        //public static string ProtoSerialize(this object input) {
+        //    string result = null;
+        //    try {
+        //        using (MemoryStream ms = new MemoryStream()) {
+        //            Serializer.Serialize(ms, input);
+        //            result = Convert.ToBase64String(ms.ToArray());
+        //        }
+        //        return result;
+        //    } catch (Exception ex) {
+        //        throw ex;
+        //    }
+        //}
+        //public static T ProtoDeserialize<T>(this string input) {
+        //    return (T)ProtoDeserialize(input, typeof(T));
+        //}
+
+        //public static object ProtoDeserialize(this string input, Type targetType) {
+        //    try {
+        //        using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(input))) {
+        //            return Serializer.Deserialize(targetType, ms);
+        //        }
+        //    } catch (Exception ex) {
+        //        throw ex;
+        //    }
+        //}
+
+        //[Obsolete("Will be removed in future versions", true)]
+        //public static string BinarySerialize(this object input) {
+        //    string result = null;
+        //    try {
+        //        using (MemoryStream ms = new MemoryStream()) {
+        //            BinaryFormatter bf = new BinaryFormatter();
+        //            bf.Serialize(ms, input);
+        //            result = Convert.ToBase64String(ms.ToArray());
+        //        }
+        //        return result;
+
+        //    } catch (Exception ex) {
+        //        throw ex;
+        //    }
+        //}
+
+        //[Obsolete("Will be removed in future versions", true)]
+        //public static object BinaryDeserialize(this string input) {
+        //    object result = null;
+        //    try {
+        //        using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(input))) {
+        //            BinaryFormatter bf = new BinaryFormatter();
+        //            result = bf.Deserialize(ms);
+        //        }
+        //        return result;
+        //    } catch (Exception ex) {
+        //        throw ex;
+        //    }
+        //}
+
+        //[Obsolete("Will be removed in future versions", true)]
+        //public static T BinaryDeserialize<T>(this string input) {
+        //    return (T)input.BinaryDeserialize();
+        //}
+        #endregion
+
+
     }
  }
