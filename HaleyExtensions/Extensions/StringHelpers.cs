@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -56,6 +58,14 @@ namespace Haley.Utils
                 }
             return result;
             }
+
+        public static byte[] GetBytes(this string input) {
+            if (!input.IsBase64()) {
+                return Encoding.UTF8.GetBytes(input);
+            }
+            var _secret = Encoding.UTF8.GetString(Convert.FromBase64String(input));
+            return Encoding.UTF8.GetBytes(input);
+        }
 
         public static bool IsBase64(this string input) {
             if (string.IsNullOrEmpty(input) || input.Length % 4 != 0
