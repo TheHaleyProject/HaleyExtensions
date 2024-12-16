@@ -48,7 +48,7 @@ namespace Haley.Utils
             return null;
             }
 
-        public static string DeSanitizeJWT(this string input) {
+        public static string DeSanitizeBase64(this string input) {
             //this cannot be base 64
             if (input.IsBase64()) return input;
             string result = input.Trim().Replace('_', '/').Replace('-', '+');
@@ -65,6 +65,12 @@ namespace Haley.Utils
             }
             var _secret = Encoding.UTF8.GetString(Convert.FromBase64String(input));
             return Encoding.UTF8.GetBytes(input);
+        }
+
+        public static string ToBase64(this string input) {
+            if (string.IsNullOrWhiteSpace(input)) return input;
+            if (input.IsBase64()) return input;
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
         }
 
         public static bool IsBase64(this string input) {
@@ -181,7 +187,7 @@ namespace Haley.Utils
         /// When a base64 string is provided as input, it will replace the "/ + = " signs.
         /// </summary>
         /// <returns> if input is not base64, it will return same input. Else it will return sanitized value.</returns>
-        public static string SanitizeJWT(this string input) {
+        public static string SanitizeBase64(this string input) {
             if (!input.IsBase64()) return input;
             string result = input.Replace('+', '-').Replace('/', '_').Replace("=", "");
             return result;
