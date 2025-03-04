@@ -50,21 +50,27 @@ namespace Haley.Utils
             try {
                 return new Uri(assembly.Location).LocalPath;
             } catch (Exception) {
+                //If we are dealing with Single published file, we might not get the basepath.
                 return null;
             }
         }
 
         public static string GetBaseDirectory(this Assembly assembly,string parentFolder = null) {
             try {
+                string result = string.Empty;
                 var filepath = assembly.GetBasePath();
-                if (filepath == null) return null;
-                string result = Path.GetDirectoryName(filepath);
+                if (!string.IsNullOrWhiteSpace(filepath)) {
+                   result  = Path.GetDirectoryName(filepath);
+                } else {
+                    result = AppDomain.CurrentDomain.BaseDirectory;
+                }
+                
                 if (!string.IsNullOrWhiteSpace(parentFolder)) {
                     result = Path.Combine(result,parentFolder);
                 }
                 return result;
             } catch (Exception) {
-                return null;
+                return AppDomain.CurrentDomain.BaseDirectory;
             }
         }
 
