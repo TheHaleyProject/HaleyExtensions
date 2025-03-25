@@ -29,6 +29,12 @@ namespace Haley.Utils
             return attributes.Length == 0 ? @enum.ToString() : ((DescriptionAttribute)attributes[0]).Description;
         }
 
+        public static string GetAttributeValue<T>(this Enum @enum) where T: Attribute{
+            FieldInfo fi = @enum.GetType().GetField(@enum.ToString());
+            var attributes = fi.GetCustomAttributes(typeof(T), false);
+            return attributes.Length == 0 ? string.Empty : ((T)attributes[0]).ToString();
+        }
+
         /// <summary>
         /// Get enum value from description
         /// </summary>
