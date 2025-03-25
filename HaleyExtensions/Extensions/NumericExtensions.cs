@@ -31,11 +31,12 @@ namespace Haley.Utils {
         }
 
         public static string Convert(this short[] array) {
-            char[] chars = new char[array.Length];
+            List<char> chars = new List<char>();
             for (int i = 0; i < array.Length; i++) {
-                chars[i] = (char)array[i]; // Convert each Int16 to a char
+                if (array[i] < 1) continue;
+                chars.Add((char)array[i]); // Convert each Int16 to a char
             }
-            return new string(chars); // Create a string from the char array
+            return new string(chars.ToArray()); // Create a string from the char array
         }
     }
 }
