@@ -9,10 +9,10 @@ namespace Haley.Utils {
         static int biSize = 1024;
         static int mSize = 1000;
         public static string ToFileSize(this long input, bool binarySize = true) {
-            return Convert.ToDouble(input).ToFileSize(binarySize);
+            return System.Convert.ToDouble(input).ToFileSize(binarySize);
         }
         public static string ToFileSize(this int input, bool binarySize = true) {
-            return Convert.ToDouble(input).ToFileSize(binarySize);
+            return System.Convert.ToDouble(input).ToFileSize(binarySize);
         }
 
         public static string ToFileSize(this double input, bool binarySize = true) {
@@ -28,6 +28,14 @@ namespace Haley.Utils {
             //what if we reached the end of depth?
             if (depth >= length) depth = length - 1; //to avoid array size error.
             return inputW.ToString() + " " + (binarySize ? biUnits[depth] : mUnits[depth]);
+        }
+
+        public static string Convert(this short[] array) {
+            char[] chars = new char[array.Length];
+            for (int i = 0; i < array.Length; i++) {
+                chars[i] = (char)array[i]; // Convert each Int16 to a char
+            }
+            return new string(chars); // Create a string from the char array
         }
     }
 }
