@@ -89,16 +89,19 @@ namespace Haley.Utils
             return Regex.IsMatch(input, "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
         }
 
-        public static bool IsValidJson(this string json) {
+        public static bool IsValidJson(this string json, bool tryParse = false) {
             try {
                 if (string.IsNullOrWhiteSpace(json)) return false;
                 string jsonContent = json;
-                if (json.IsArray()) {
-                    jsonContent = json.Substring(1, json.Length - 2).Trim();
+                if (tryParse) {
+                    JsonDocument.Parse(json.Trim());
+                    return true; //too much time consuming.
+                } else {
+                    if (json.IsArray()) {
+                        jsonContent = json.Substring(1, json.Length - 2).Trim();
+                    }
+                    if (jsonContent.StartsWith("{") && jsonContent.EndsWith("}")) return true;
                 }
-
-                if (jsonContent.StartsWith("{") && jsonContent.EndsWith("}")) return true;
-                //JsonDocument.Parse(json.Trim()); return true; //too much time consuming.
             } catch (Exception ex) {
                 }
             return false;
