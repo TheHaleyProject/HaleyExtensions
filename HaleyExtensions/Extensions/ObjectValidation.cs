@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Haley.Utils
 {
@@ -89,6 +90,12 @@ namespace Haley.Utils
             {
                 return false;
             }
+        }
+        public static bool IsNumericType(this object obj) {
+            if (obj is int || obj is double || obj is float || obj is decimal || obj is long || obj is short || obj is byte || obj is sbyte ||obj is ulong || obj is ushort) {
+                return true;
+            }
+            return false;
         }
     }
 }
