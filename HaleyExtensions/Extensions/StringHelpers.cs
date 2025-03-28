@@ -217,6 +217,15 @@ namespace Haley.Utils
             return numbered_key;
         }
 
+        public static string ToCompactJson(this string input) {
+            try {
+                var jobj = JsonObject.Parse(input);
+                return JsonSerializer.Serialize(jobj); //This will return a compact json without any intended spaces or breaks.
+            } catch (Exception) {
+                return input;
+            }
+        }
+
         static void DeepConvertJson(Dictionary<string, object> dic,int searchlevel,int currentlevel, string[] ignoreKeys) {
 
             if (dic == null || dic.Count < 1) return;
