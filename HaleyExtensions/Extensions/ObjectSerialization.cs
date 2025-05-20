@@ -25,7 +25,7 @@ namespace Haley.Utils
             if (include_default_converters) EnsureDefaultJsonConverters(ref result);
             return result;
         }
-        static JsonSerializerOptions GetOptions(bool generateNew= false) {
+        internal static JsonSerializerOptions GetOptions(bool generateNew= false) {
             if (generateNew) {
                 return GenerateNewOptions(true);
             }

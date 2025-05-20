@@ -220,7 +220,16 @@ namespace Haley.Utils
         public static string ToCompactJson(this string input) {
             try {
                 var jobj = JsonObject.Parse(input);
-                return JsonSerializer.Serialize(jobj); //This will return a compact json without any intended spaces or breaks.
+                return JsonSerializer.Serialize(jobj,new JsonSerializerOptions()); //This will return a compact json without any intended spaces or breaks.
+            } catch (Exception) {
+                return input;
+            }
+        }
+
+        public static string ToIntendedJson(this string input) {
+            try {
+                var jobj = JsonObject.Parse(input);
+                return JsonSerializer.Serialize(jobj, ObjectSerialization.GenerateNewOptions()); //This will return a compact json without any intended spaces or breaks.
             } catch (Exception) {
                 return input;
             }
