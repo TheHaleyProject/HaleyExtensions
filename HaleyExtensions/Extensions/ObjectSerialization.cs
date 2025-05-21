@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Collections;
 using System.Linq;
+using System.Text.Encodings.Web;
 
 namespace Haley.Utils
 {
@@ -21,6 +22,7 @@ namespace Haley.Utils
                 IncludeFields = true,
                 IgnoreReadOnlyFields = false,
                 IgnoreReadOnlyProperties = false,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping //to allow & to be saved as & and not in unicode format.
             };
             if (include_default_converters) EnsureDefaultJsonConverters(ref result);
             return result;
