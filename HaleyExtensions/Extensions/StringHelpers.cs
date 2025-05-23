@@ -235,6 +235,11 @@ namespace Haley.Utils
             }
         }
 
+        public static string ToJsonArray(this List<string> input) {
+            if (input == null || input.Count < 1) return "[]"; //Empty array.
+            return "[" + string.Join(",", input.ToArray()) + "]";
+        }
+
         static void DeepConvertJson(Dictionary<string, object> dic,int searchlevel,int currentlevel, string[] ignoreKeys) {
 
             if (dic == null || dic.Count < 1) return;
