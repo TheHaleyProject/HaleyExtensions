@@ -240,6 +240,22 @@ namespace Haley.Utils
             return "[" + string.Join(",", input.ToArray()) + "]";
         }
 
+        public static Dictionary<string,object> DictionaryConvert(this string input, char delimiter = ';') {
+            Dictionary<string, object> result = new Dictionary<string, object>();
+            if (string.IsNullOrWhiteSpace(input)) return result;
+            foreach (var prop in input.Trim().Split(delimiter)) {
+                var kvp = prop.Split('=');
+                if (result.ContainsKey(kvp[0])) continue;
+                result.Add(kvp[0]?.Trim(), null); //add the key and value.
+                if (kvp.Length == 2) {
+                    result[kvp[0]] = kvp[1].Trim();
+                } else {
+                    result[kvp[0]] = true; //Which means the parameter is present and not necessarily has a value.
+                }
+            }
+            return result;
+        }
+
         static void DeepConvertJson(Dictionary<string, object> dic,int searchlevel,int currentlevel, string[] ignoreKeys) {
 
             if (dic == null || dic.Count < 1) return;
