@@ -38,7 +38,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-	  <PackageReference Include="System.Text.Json" Version="9.0.2" />
+	  <PackageReference Include="System.Text.Json" Version="9.0.6" />
 	</ItemGroup>
 	<Import Project="$(SolutionDir)ProjectReferences_$(SolutionName).txt" Condition="Exists('$(SolutionDir)ProjectReferences_$(SolutionName).txt')" />
 	<Choose>
