@@ -246,7 +246,7 @@ namespace Haley.Utils
             return "[" + string.Join(",", input.ToArray()) + "]";
         }
 
-        public static Dictionary<string,object> DictionaryConvert(this string input, char delimiter = ';') {
+        public static Dictionary<string,object> ToDictionarySplit(this string input, char delimiter = ';') {
             Dictionary<string, object> result = new Dictionary<string, object>();
             if (string.IsNullOrWhiteSpace(input)) return result;
             foreach (var prop in input.Trim().Split(delimiter)) {
