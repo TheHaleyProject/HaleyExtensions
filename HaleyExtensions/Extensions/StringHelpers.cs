@@ -246,6 +246,11 @@ namespace Haley.Utils
             return "[" + string.Join(",", input.ToArray()) + "]";
         }
 
+        public static string ToDBLower(this string input) {
+            if (string.IsNullOrWhiteSpace(input)) return input;
+            return input.Trim().ToLower().Replace(" ", "_");
+        }
+
         public static Dictionary<string,object> ToDictionarySplit(this string input, char delimiter = ';') {
             Dictionary<string, object> result = new Dictionary<string, object>();
             if (string.IsNullOrWhiteSpace(input)) return result;
