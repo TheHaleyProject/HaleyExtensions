@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -16,6 +18,12 @@ namespace Haley.Utils
 {
     public static class StringHelpers
     {
+        static string emailPattern = @"^[\w\-_.]+@([\w\-_]+\.)+[\w\-_]{2,4}$";
+        public static bool IsValidEmail(this string source) {
+            var emailRegex = new Regex(emailPattern);
+            return emailRegex.IsMatch(source ?? string.Empty) ? true : false;
+        }
+
         public static CompareStatus? CompareWith(this string source, string target) {
             var _pattern = @"\d+";
 
