@@ -18,7 +18,7 @@ namespace Haley.Utils
 {
     public static class StringHelpers
     {
-        static string emailPattern = @"^[\w\-_.]+@([\w\-_]+\.)+[\w\-_]{2,4}$";
+        static string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
         public static bool IsValidEmail(this string source) {
             var emailRegex = new Regex(emailPattern);
             return emailRegex.IsMatch(source ?? string.Empty) ? true : false;
