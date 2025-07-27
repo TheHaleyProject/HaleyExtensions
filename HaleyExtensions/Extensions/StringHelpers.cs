@@ -142,7 +142,7 @@ namespace Haley.Utils
             }
         }
 
-        public static string Separate(this string input, int splitLength, int depth, string delimiter = "\\", bool addPadding = true,  char padChar = '0', bool isDirPath = false) {
+        public static string Separate(this string input, int splitLength, int depth, string delimiter = "\\", bool addPadding = true,  char padChar = '0', bool resultAsPath = false) {
             if (string.IsNullOrWhiteSpace(input)) { throw new ArgumentNullException("Input is empty. Nothing to split."); }
             if (depth < 0) depth = 0; //We cannot have less than 0
             if (splitLength < 1) splitLength = 2; //we need a minimum 1 split.
@@ -156,7 +156,7 @@ namespace Haley.Utils
             bool isLastPart = false;
 
             //for number or for hash, we need to ensure that, we need a padding. padding will be with 0. Should the padding happen at the right or left?
-            if (addPadding ) {
+            if ( addPadding ) {
                 var padLength = splitLength - (wval.Length % splitLength);
                 if (padLength != 0 && padLength != splitLength) {
                     wval =  wval.PadLeft(wval.Length + padLength, padChar);
@@ -179,7 +179,7 @@ namespace Haley.Utils
                 pathBuilder.Add(idPart);
                 currentLevel++; //add one more depth to the directory desired.
             }
-            if (isDirPath) return Path.Combine(pathBuilder.ToArray()); //because the delimiter '//' will not work for linux.. it expects \\
+            if (resultAsPath) return Path.Combine(pathBuilder.ToArray()); //because the delimiter '//' will not work for linux.. it expects \\
             return string.Join(delimiter, pathBuilder.ToArray());
         }
 
