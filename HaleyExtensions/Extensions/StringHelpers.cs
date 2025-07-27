@@ -57,11 +57,6 @@ namespace Haley.Utils
             return null;
             }
 
-        public static string ToDBName(this string input) {
-            if (string.IsNullOrWhiteSpace(input)) return input;
-            return input.Trim().Replace(" ", "_").ToLower();
-        }
-
         public static string DeSanitizeBase64(this string input) {
             //this cannot be base 64
             if (input.IsBase64()) return input;
@@ -78,7 +73,7 @@ namespace Haley.Utils
                 return Encoding.UTF8.GetBytes(input);
             }
             var _secret = Encoding.UTF8.GetString(Convert.FromBase64String(input));
-            return Encoding.UTF8.GetBytes(input);
+            return Encoding.UTF8.GetBytes(_secret);
         }
 
         public static string ToBase64(this string input) {
@@ -254,13 +249,21 @@ namespace Haley.Utils
             return "[" + string.Join(",", input.ToArray()) + "]";
         }
 
-        public static string ToDBLower(this string input) {
+        public static string ToDBName(this string input) {
             if (string.IsNullOrWhiteSpace(input)) return input;
-            return input.Trim().ToLower().Replace(" ", "_");
+            return input.Trim().Replace(" ", "_").ToLower();
+        }
+
+        public static string RemoveKeys(this string input, char delimiter ,params string[] keys) {
+            var dic = input.ToDictionarySplit(delimiter);
+            foreach (var key in keys) {
+                if (dic.ContainsKey(key)) dic.Remove(key);
+            }
+            return string.Join(delimiter.ToString(), dic.Select(p => $@"{p.Key}={p.Value}"));
         }
 
         public static Dictionary<string,object> ToDictionarySplit(this string input, char delimiter = ';') {
-            Dictionary<string, object> result = new Dictionary<string, object>();
+            Dictionary<string, object> result = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             if (string.IsNullOrWhiteSpace(input)) return result;
             foreach (var prop in input.Trim().Split(delimiter)) {
                 var kvp = prop.Split('=');
