@@ -156,8 +156,9 @@ namespace Haley.Utils
             bool isLastPart = false;
 
             //for number or for hash, we need to ensure that, we need a padding. padding will be with 0. Should the padding happen at the right or left?
-            if ( addPadding ) {
-                var padLength = splitLength - (wval.Length % splitLength);
+            //Only when the depth is full, we need to consider padding.
+            if ( addPadding && depth ==0) {
+                var padLength = splitLength - (wval.Length % splitLength); //Getting the remainder
                 if (padLength != 0 && padLength != splitLength) {
                     wval =  wval.PadLeft(wval.Length + padLength, padChar);
                 }
