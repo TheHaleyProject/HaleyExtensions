@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Linq;
+using System.Reflection;
+using System.Linq;
 
 namespace Haley.Utils
 {
@@ -96,6 +99,29 @@ namespace Haley.Utils
                 return true;
             }
             return false;
+        }
+
+        public static bool AssertValue(this object obj, bool throwException = false,string propname = null) {
+            var objType = obj?.GetType();
+            if (objType != null &&  objType.FullName.StartsWith("System.ValueTuple")) {
+                //Let us support only value tuple.
+                var fields = objType.GetFields(BindingFlags.Instance | BindingFlags.Public).Where(p => p.Name.StartsWith("Item")).ToArray();
+                return fields[0].GetValue(obj).AssertValue(throwException, fields[1].GetValue(obj).ToString());
+            }
+
+            if (obj == null || (obj is string obstr && string.IsNullOrWhiteSpace(obstr))) {
+                var property = propname ?? "";
+                if (throwException) throw new ArgumentNullException($@"Provided input is empty or null. Please check {property}");
+                return false;
+            }
+            return true;
+        }
+
+        public static bool AssertValues(bool throwException, params object[] values) {
+            foreach (var item in values) {
+                if (!item.AssertValue(throwException)) return false;
+            }
+            return true;
         }
     }
 }
