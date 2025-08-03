@@ -95,7 +95,19 @@ namespace Haley.Utils
             }
 
         public static bool IsMD5(this string input) {
-            return Regex.IsMatch(input, "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
+            return Regex.IsMatch(input?.Trim(), "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
+        }
+
+        public static bool IsSha256(this string input) {
+            return Regex.IsMatch(input?.Trim(), "^[0-9a-fA-F]{64}$", RegexOptions.Compiled);
+        }
+        
+        public static bool IsValidGuid(this string input, out Guid guid) {
+            return Guid.TryParse(input, out guid);
+        }
+
+        public static bool IsCompactGuid(this string input,out Guid guid) {
+            return Guid.TryParseExact(input, "N", out guid); //'N' Format guid means No hypens, no braces, no extra stuff.
         }
 
         public static bool IsValidJson(this string json, bool tryParse = false) {
