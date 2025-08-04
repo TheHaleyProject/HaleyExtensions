@@ -92,7 +92,12 @@ namespace Haley.Utils
                 } catch (Exception) {
                 return false;
                 }
-            }
+        }
+
+        public static bool IsNumber(this string input) {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            return double.TryParse(input, out _);
+        }
 
         public static bool IsMD5(this string input) {
             return Regex.IsMatch(input?.Trim(), "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
