@@ -165,7 +165,7 @@ namespace Haley.Utils
             if (depth < 0) depth = 0; //We cannot have less than 0
             if (depth > 12) depth = 12;
             if (splitLength < 0) splitLength = 0; //we need a minimum 1 split.
-            if (splitLength > 8) splitLength = 8;
+            if (splitLength > 10) splitLength = 10;
             
             if (splitLength < 1) {
                 return Path.GetFileName(input).Trim().Replace(" ", "");
