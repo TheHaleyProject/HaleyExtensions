@@ -161,9 +161,16 @@ namespace Haley.Utils
 
         public static string Separate(this string input, int splitLength, int depth, string delimiter = "\\", bool addPadding = true,  char padChar = '0', bool resultAsPath = false) {
             if (string.IsNullOrWhiteSpace(input)) { throw new ArgumentNullException("Input is empty. Nothing to split."); }
+           
             if (depth < 0) depth = 0; //We cannot have less than 0
-            if (splitLength < 1) splitLength = 2; //we need a minimum 1 split.
-            if (splitLength > 7) splitLength = 7;
+            if (depth > 12) depth = 12;
+            if (splitLength < 0) splitLength = 0; //we need a minimum 1 split.
+            if (splitLength > 8) splitLength = 8;
+            
+            if (splitLength < 1) {
+                return Path.GetFileName(input).Trim().Replace(" ", "");
+            }
+
             List<string> pathBuilder = new List<string>();
             var wval = Path.GetFileNameWithoutExtension(input)?.Trim()?.Replace(" ",""); //Just a precaution to exclude extension
             var extension = Path.GetExtension(input);
@@ -174,14 +181,14 @@ namespace Haley.Utils
 
             //for number or for hash, we need to ensure that, we need a padding. padding will be with 0. Should the padding happen at the right or left?
             //Only when the depth is full, we need to consider padding.
-            if ( addPadding && depth ==0) {
+            if ( addPadding && depth ==0 && splitLength > 0) {
                 var padLength = splitLength - (wval.Length % splitLength); //Getting the remainder
                 if (padLength != 0 && padLength != splitLength) {
                     wval =  wval.PadLeft(wval.Length + padLength, padChar);
                 }
             }
 
-            for (int i = 0; i < wval.Length && !isLastPart; i = i + splitLength) {
+            for (int i = 0; i < wval.Length && !isLastPart && splitLength > 0; i = i + splitLength) {
                 //if i+2 is greater than idString.Length, then we are at the last part.
                 if (depth > 0 && currentLevel > depth) {
                     isLastPart = true; //we will not rerun again.
@@ -197,6 +204,7 @@ namespace Haley.Utils
                 pathBuilder.Add(idPart);
                 currentLevel++; //add one more depth to the directory desired.
             }
+
             if (resultAsPath) return Path.Combine(pathBuilder.ToArray()); //because the delimiter '//' will not work for linux.. it expects \\
             return string.Join(delimiter, pathBuilder.ToArray());
         }
