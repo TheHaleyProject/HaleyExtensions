@@ -288,6 +288,20 @@ namespace Haley.Utils
             return string.Join(delimiter.ToString(), dic.Select(p => $@"{p.Key}={p.Value}"));
         }
 
+        public static string ReplaceValues(this string input, char delimiter, params (string key, string newvalue)[] replacements ) {
+            if (!input.AssertValue()) return input;
+            var dic = input.ToDictionarySplit(delimiter);
+            foreach (var item in replacements) {
+                if (string.IsNullOrWhiteSpace(item.key) || string.IsNullOrWhiteSpace(item.newvalue) || !dic.ContainsKey(item.key)) continue;
+                dic[item.key] = item.newvalue;
+            }
+            return string.Join(delimiter.ToString(), dic.Where(p => !string.IsNullOrWhiteSpace(p.Key)).Select(q => $@"{q.Key}={q.Value}"));
+        }
+
+        public static string ReplaceValue(this string input, char delimiter, string key, string newvalue) {
+            return ReplaceValues(input, delimiter, (key, newvalue));
+        }
+
         public static Dictionary<string,object> ToDictionarySplit(this string input, char delimiter = ';') {
             Dictionary<string, object> result = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             if (string.IsNullOrWhiteSpace(input)) return result;
