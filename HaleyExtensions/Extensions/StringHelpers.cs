@@ -293,7 +293,7 @@ namespace Haley.Utils
             if (string.IsNullOrWhiteSpace(input)) return result;
             foreach (var prop in input.Trim().Split(delimiter)) {
                 var kvp = prop.Split('=');
-                if (result.ContainsKey(kvp[0])) continue;
+                if (string.IsNullOrWhiteSpace(kvp[0]) || result.ContainsKey(kvp[0])) continue;
                 result.Add(kvp[0]?.Trim(), null); //add the key and value.
                 if (kvp.Length == 2) {
                     result[kvp[0]] = kvp[1].Trim();
