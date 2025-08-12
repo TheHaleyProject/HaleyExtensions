@@ -75,15 +75,20 @@ namespace Haley.Utils
             return handler.CreateDBInput(input);
         }
 
-        public static IAdapterArgs ForTransaction(this IAdapterArgs input, ITransactionHandler handler) {
+        public static IAdapterArgs ForTransaction(this IAdapterArgs input, ITransactionHandler handler, bool throwInvalid = true) {
+            if (handler == null) {
+                if (throwInvalid) throw new ArgumentNullException("Handler cannot be null. Cannot include transaction information in the adatper argument");
+                return input;
+            }
+
             if (input is AdapterArgs db && handler is IDBAdapter th) {
                 db.Adapter = th; //set the target
                 db.TransactionMode = true;
             }
             return input;
         }
-        public static P ForTransaction<P>(this IAdapterArgs input, ITransactionHandler handler) where P : IAdapterArgs{
-            return (P)ForTransaction(input, handler);
+        public static P ForTransaction<P>(this IAdapterArgs input, ITransactionHandler handler, bool throwInvalid = true) where P : IAdapterArgs{
+            return (P)ForTransaction(input, handler,throwInvalid);
         }
     }
 }
