@@ -302,6 +302,18 @@ namespace Haley.Utils
             return ReplaceValues(input, delimiter, (key, newvalue));
         }
 
+        public static bool TryDictionarySplit (this string input, out Dictionary<string, object> result, char delimiter = ';') {
+            result = null;
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            try {
+                result = ToDictionarySplit(input, delimiter);
+                if (result == null || result.Count < 1) return false; //If the dictionary is empty, then we cannot proceed. 
+                return true;
+            } catch (Exception) {
+                return false;
+            }
+        }
+
         public static Dictionary<string,object> ToDictionarySplit(this string input, char delimiter = ';') {
             Dictionary<string, object> result = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             if (string.IsNullOrWhiteSpace(input)) return result;
