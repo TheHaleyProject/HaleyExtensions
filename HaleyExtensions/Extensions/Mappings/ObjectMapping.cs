@@ -74,7 +74,7 @@ namespace Haley.Utils
                 }
 
                 var sourceProperties = source.GetType().GetProperties().Select(p => p); //We don't have to worry about source properites being readonly. We are merely going to get it.
-                var targetProperties = target.GetType().GetProperties().Where(p => p.CanWrite); //Only take properties which are not readonly.
+                var targetProperties = target.GetType().GetProperties().Where(p => mapping_info.IncludePrivateProperties ? true : p.CanWrite); //Only take properties which are not readonly.
 
                 if (sourceProperties == null || sourceProperties?.Count() == 0 || targetProperties == null || targetProperties?.Count() == 0) return target;
 
