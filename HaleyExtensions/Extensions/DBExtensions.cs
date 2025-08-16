@@ -57,6 +57,7 @@ namespace Haley.Utils
             if (input is ModuleArgs mdp) {
                 db.Adapter = mdp.Adapter; //set the target
                 db.TransactionMode = mdp.TransactionMode;
+                db.IsDevelopment = mdp.IsDevelopment;
             }
             return db;
         }
