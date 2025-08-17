@@ -22,7 +22,7 @@
 		  <AssemblyVersion>2.0.1.0</AssemblyVersion>
 		  <FileVersion>2.0.1.0</FileVersion>
 		  <PackageTags>IOC, DependencyInjection, DI</PackageTags>
-		  <Version>2.3.8</Version>
+		  <Version>2.3.9</Version>
 		  <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		  <Configurations>Debug;Release;Debug_Net6</Configurations>
 	</PropertyGroup>
@@ -51,7 +51,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="Haley.Abstractions" Version="1.2.10" />
+        <PackageReference Include="Haley.Abstractions" Version="1.2.11" />
       </ItemGroup>
     </Otherwise>
 	</Choose>
