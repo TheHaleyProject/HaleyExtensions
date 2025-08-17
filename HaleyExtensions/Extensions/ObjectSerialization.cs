@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using System.Collections;
-using System.Linq;
-using System.Text.Encodings.Web;
 
 namespace Haley.Utils
 {
@@ -149,6 +151,44 @@ namespace Haley.Utils
         {
             var options = GetOptions(true);
             return ToJsonInternal(source,ref options, converters);
+        }
+
+        public static Dictionary<string,object> AsDictionary(this object source) {
+            //If given object is dictionary return as is
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            if (source is Dictionary<string, object> inputDic) return inputDic;
+
+            var type = source.GetType();
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            var dict = new Dictionary<string, object>();
+
+            foreach (var prop in properties) {
+                var value = prop.GetValue(source);
+                dict[prop.Name] = value;
+            }
+
+            return dict;
+        }
+
+        public static IEnumerable<KeyValuePair<string,string>> AsURLEncodedInput(this object source) {
+            var result = new List<KeyValuePair<string, string>>();
+            var dic = source.AsDictionary();
+            foreach (var kvp in dic) {
+                if (kvp.Value is IEnumerable<string> stringList) {
+                    foreach (var val in stringList) {
+                        result.Add(new KeyValuePair<string, string>(kvp.Key, val));
+                    }
+                } else if (kvp.Value is IEnumerable<object> objList && !(kvp.Value is string)) {
+                    foreach (var val in objList) {
+                        result.Add(new KeyValuePair<string, string>(kvp.Key, val?.ToString() ?? ""));
+                    }
+                } else {
+                    result.Add(new KeyValuePair<string, string>(kvp.Key, kvp.Value?.ToString() ?? ""));
+                }
+            }
+            return result;
         }
 
        
