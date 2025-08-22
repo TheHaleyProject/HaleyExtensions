@@ -9,6 +9,8 @@ namespace Haley.Utils
     public static class ObjectConversion
     {
         #region Conversions
+
+
         public static string AsString(this object value)
         {
             if (value == null) return null;
