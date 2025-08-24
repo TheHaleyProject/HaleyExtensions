@@ -71,18 +71,24 @@ namespace Haley.Utils
 
 
         public static IEnumerable<object> GetPropAtLevels<T>(this List<T> roots, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
-            return GetPropRecursive(roots, 1, targetLevels.Max(), targetLevels, dataProcesor)
+            int stoplevel = 0;
+            if (targetLevels != null && targetLevels.Length > 0) stoplevel = targetLevels.Max();
+            return GetPropAtLevels(roots, targetLevels, stoplevel, dataProcesor);
+        }
+
+        public static IEnumerable<object> GetPropAtLevels<T>(this List<T> roots, int[] targetLevels,int stoplevel, Func<T, int, object> dataProcesor) where T : ICompositeObj<T> {
+            return GetPropRecursive(roots, 1, stoplevel, targetLevels, dataProcesor)
                 //.Where(x => targetLevels.Contains(x.level))
                 .Select(x => x.data);
         }
 
         static IEnumerable<(object data, int level)> GetPropRecursive<T>(IEnumerable<T> nodes, int level, int stoplevel, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
-            if (level > stoplevel) {
+            if (stoplevel != 0 && level > stoplevel) {
                 yield break; // Stop recursion if the current level exceeds the stopping level
             }
 
             foreach (var node in nodes) {
-                if (targetLevels.Contains(level)) {
+                if ((targetLevels== null || targetLevels.Count() == 0) || targetLevels.Contains(level)) {
                     var data = dataProcesor(node, level);
                     if (data != null) {
                         yield return (data, level); //Yield only for the target levels and not for everything else
