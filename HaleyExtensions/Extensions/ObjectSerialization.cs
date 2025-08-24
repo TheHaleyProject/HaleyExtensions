@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -24,6 +25,7 @@ namespace Haley.Utils
                 IncludeFields = true,
                 IgnoreReadOnlyFields = false,
                 IgnoreReadOnlyProperties = false,
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping //to allow & to be saved as & and not in unicode format.
             };
             if (include_default_converters) EnsureDefaultJsonConverters(ref result);

@@ -22,6 +22,18 @@ namespace Haley.Utils
             return input ? "Yes" : "No";
         }
 
+        public static ICompositeObj<T> BuildTree<T>(this ICompositeObj<T> source) where T: ICompositeObj<T> {
+            var lookup = source.Children.ToDictionary(p => p.Id); //Get all the children with their ID.
+            foreach (var node in source.Children) {
+                if (node.ParentId > 0 && lookup.TryGetValue(node.ParentId, out var parent)) {
+                    if (parent.Children.Any(q => q.Id == node.Id)) continue; //It already contains a similar children with the same code.
+                    parent.Children.Add(node);
+                }
+            }
+            source.Children.RemoveAll(p => p.ParentId > 1); //Remove the child items from the flat list
+            return source;
+        }
+
 
         /// <summary>
         /// Builds a URL address from the given components 
