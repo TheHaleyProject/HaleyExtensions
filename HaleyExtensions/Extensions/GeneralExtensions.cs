@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json.Nodes;
 
 namespace Haley.Utils
 {
@@ -33,7 +34,6 @@ namespace Haley.Utils
             source.Children.RemoveAll(p => p.ParentId > 1); //Remove the child items from the flat list
             return source;
         }
-
 
         /// <summary>
         /// Builds a URL address from the given components 
