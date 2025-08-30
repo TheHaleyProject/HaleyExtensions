@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text.Json.Nodes;
 
 namespace Haley.Utils
 {
@@ -10,7 +11,9 @@ namespace Haley.Utils
     {
         #region Conversions
 
-
+        public static JsonNode AsJsonValue(this object input) {
+            return input == null ? null : JsonValue.Create(input);
+        }
         public static string AsString(this object value)
         {
             if (value == null) return null;
