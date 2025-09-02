@@ -68,14 +68,17 @@ namespace Haley.Utils
             return result;
         }
 
-        public static P ForTransaction<P>(this IModuleArgs input, ITransactionHandler handler) where P: IModuleArgs {
-            return (P)ForTransaction(input, handler);
+        public static P ForTransaction<P>(this IModuleArgs input, ITransactionHandler handler, bool throwInvalid = true) where P: IModuleArgs {
+            return (P)ForTransaction(input, handler,throwInvalid);
         }
-        public static IModuleArgs ForTransaction(this IModuleArgs input, ITransactionHandler handler) {
+        public static IModuleArgs ForTransaction(this IModuleArgs input, ITransactionHandler handler, bool throwInvalid = true) {
             if (handler == null) {
-                Console.WriteLine("Hander not found. Returning the same module args");
-                return input;
-            }
+                if (!throwInvalid) {
+                    Console.WriteLine("Hander not found. Returning the same module args");
+                    return input;
+                }
+                throw new ArgumentNullException("Handler cannot be null. Cannot include transaction information in the adatper argument");
+            } 
             return handler.CreateDBInput(input);
         }
 
