@@ -72,6 +72,10 @@ namespace Haley.Utils
             return (P)ForTransaction(input, handler);
         }
         public static IModuleArgs ForTransaction(this IModuleArgs input, ITransactionHandler handler) {
+            if (handler == null) {
+                Console.WriteLine("Hander not found. Returning the same module args");
+                return input;
+            }
             return handler.CreateDBInput(input);
         }
 
