@@ -23,6 +23,7 @@ namespace Haley.Utils
             var result = new JsonSerializerOptions() {
                 WriteIndented = true,
                 IncludeFields = true,
+                PropertyNameCaseInsensitive = true,
                 IgnoreReadOnlyFields = false,
                 IgnoreReadOnlyProperties = false,
                 TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
@@ -36,6 +37,17 @@ namespace Haley.Utils
                 return GenerateNewOptions(true);
             }
             return commonOptions;
+        }
+
+        internal static JsonSerializerOptions GetOptionsWithOverride(bool generateNew = false, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false) {
+
+            if (caseInSensitive == null && ignoreReadOnlyElements == null && !generateNew) return commonOptions; //Return the common static options.
+
+            var options = GetOptions(true);
+            options.PropertyNameCaseInsensitive = caseInSensitive ?? options.PropertyNameCaseInsensitive;
+            options.IgnoreReadOnlyFields = ignoreReadOnlyElements ?? options.IgnoreReadOnlyFields;
+            options.IgnoreReadOnlyProperties = ignoreReadOnlyElements ?? options.IgnoreReadOnlyProperties;
+            return options;
         }
 
         private static void EnsureDefaultJsonConverters(ref JsonSerializerOptions options)
@@ -90,19 +102,20 @@ namespace Haley.Utils
             return serializer.Deserialize(rdr);
         }
 
-        public static T FromJson<T>(this string input)
+        public static T FromJson<T>(this string input, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false)
         {
-            return FromJsonInternal<T>(input, GetOptions());
+            var options = GetOptionsWithOverride(false,caseInSensitive, ignoreReadOnlyElements);
+            return FromJsonInternal<T>(input, options);
         }
 
-        
         public static T FromJson<T>(this string input, JsonSerializerOptions options)
         {
             return FromJsonInternal<T>(input, options);
         }
 
-        public static object FromJson(this string input, Type targetType) {
-            return FromJsonInternal(input, GetOptions(), targetType);
+        public static object FromJson(this string input, Type targetType, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false) {
+            var options = GetOptionsWithOverride(false,caseInSensitive, ignoreReadOnlyElements);
+            return FromJsonInternal(input, options, targetType);
         }
 
         public static object FromJson(this string input, JsonSerializerOptions options,Type targetType)
@@ -117,6 +130,16 @@ namespace Haley.Utils
         }
         private static T FromJsonInternal<T>(string input, JsonSerializerOptions option) {
             return JsonSerializer.Deserialize<T>(input,options: option);
+        }
+
+        public static string ToJson(this object source, bool generateNew = false, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false) {
+            var options = GetOptions(true);
+            return ToJsonInternal(source, ref options, converters);
+        }
+
+        public static string ToJson(this object source, List<JsonConverter> converters) {
+            var options = GetOptions(true);
+            return ToJsonInternal(source, ref options, converters);
         }
 
         public static string ToJson(this object source,JsonSerializerOptions options)
@@ -149,11 +172,7 @@ namespace Haley.Utils
                 return ex.ToString();
             }
         }
-        public static string ToJson(this object source,List<JsonConverter> converters = null)
-        {
-            var options = GetOptions(true);
-            return ToJsonInternal(source,ref options, converters);
-        }
+       
 
         public static Dictionary<string,object> AsDictionary(this object source) {
             //If given object is dictionary return as is
