@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -39,14 +40,17 @@ namespace Haley.Utils
             return commonOptions;
         }
 
-        internal static JsonSerializerOptions GetOptionsWithOverride(bool generateNew = false, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false) {
+        internal static JsonSerializerOptions GetOptionsWithOverride(bool generateNew = false, bool? caseInSensitive = null, bool? ignoreReadOnlyElements = null, bool? writeIntended = null) {
 
-            if (caseInSensitive == null && ignoreReadOnlyElements == null && !generateNew) return commonOptions; //Return the common static options.
+            if (caseInSensitive == null && ignoreReadOnlyElements == null && writeIntended == null && !generateNew) return commonOptions; //Return the common static options.
 
             var options = GetOptions(true);
-            options.PropertyNameCaseInsensitive = caseInSensitive ?? options.PropertyNameCaseInsensitive;
-            options.IgnoreReadOnlyFields = ignoreReadOnlyElements ?? options.IgnoreReadOnlyFields;
-            options.IgnoreReadOnlyProperties = ignoreReadOnlyElements ?? options.IgnoreReadOnlyProperties;
+            if (caseInSensitive != null) options.PropertyNameCaseInsensitive = caseInSensitive.Value;
+            if (writeIntended != null) options.WriteIndented = writeIntended.Value;
+            if (ignoreReadOnlyElements != null) {
+                options.IgnoreReadOnlyFields = ignoreReadOnlyElements.Value; 
+                options.IgnoreReadOnlyProperties = ignoreReadOnlyElements.Value; 
+            }
             return options;
         }
 
@@ -102,7 +106,7 @@ namespace Haley.Utils
             return serializer.Deserialize(rdr);
         }
 
-        public static T FromJson<T>(this string input, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false)
+        public static T FromJson<T>(this string input, bool? caseInSensitive = null, bool? ignoreReadOnlyElements = null)
         {
             var options = GetOptionsWithOverride(false,caseInSensitive, ignoreReadOnlyElements);
             return FromJsonInternal<T>(input, options);
@@ -113,7 +117,7 @@ namespace Haley.Utils
             return FromJsonInternal<T>(input, options);
         }
 
-        public static object FromJson(this string input, Type targetType, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false) {
+        public static object FromJson(this string input, Type targetType, bool? caseInSensitive = null, bool? ignoreReadOnlyElements = null) {
             var options = GetOptionsWithOverride(false,caseInSensitive, ignoreReadOnlyElements);
             return FromJsonInternal(input, options, targetType);
         }
@@ -132,13 +136,13 @@ namespace Haley.Utils
             return JsonSerializer.Deserialize<T>(input,options: option);
         }
 
-        public static string ToJson(this object source, bool generateNew = false, bool? caseInSensitive = true, bool? ignoreReadOnlyElements = false) {
-            var options = GetOptions(true);
-            return ToJsonInternal(source, ref options, converters);
+        public static string ToJson(this object source, bool generateNew = false, bool? caseInSensitive = null, bool? ignoreReadOnlyElements = null, bool? writeIntended = null) {
+            var options = GetOptionsWithOverride(generateNew, caseInSensitive, ignoreReadOnlyElements, writeIntended);
+            return ToJsonInternal(source, ref options, null);
         }
 
-        public static string ToJson(this object source, List<JsonConverter> converters) {
-            var options = GetOptions(true);
+        public static string ToJson(this object source, List<JsonConverter> converters, bool generateNew = false, bool? caseInSensitive = null, bool? ignoreReadOnlyElements = null, bool? writeIntended = null) {
+            var options = GetOptionsWithOverride(generateNew, caseInSensitive, ignoreReadOnlyElements,writeIntended);
             return ToJsonInternal(source, ref options, converters);
         }
 
