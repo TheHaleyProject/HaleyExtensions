@@ -87,19 +87,19 @@ namespace Haley.Utils
         }
 
 
-        public static IEnumerable<object> GetPropAtLevels<T>(this List<T> roots, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
+        public static IEnumerable<object> GetContentAtLevels<T>(this List<T> roots, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
             int stoplevel = 0;
             if (targetLevels != null && targetLevels.Length > 0) stoplevel = targetLevels.Max();
-            return GetPropAtLevels(roots, targetLevels, stoplevel, dataProcesor);
+            return GetContentAtLevels(roots, targetLevels, stoplevel, dataProcesor);
         }
 
-        public static IEnumerable<object> GetPropAtLevels<T>(this List<T> roots, int[] targetLevels,int stoplevel, Func<T, int, object> dataProcesor) where T : ICompositeObj<T> {
-            return GetPropRecursive(roots, 1, stoplevel, targetLevels, dataProcesor)
+        public static IEnumerable<object> GetContentAtLevels<T>(this List<T> roots, int[] targetLevels,int stoplevel, Func<T, int, object> dataProcesor) where T : ICompositeObj<T> {
+            return GetContentRecursive(roots, 1, stoplevel, targetLevels, dataProcesor)
                 //.Where(x => targetLevels.Contains(x.level))
                 .Select(x => x.data);
         }
 
-        static IEnumerable<(object data, int level)> GetPropRecursive<T>(IEnumerable<T> nodes, int level, int stoplevel, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
+        static IEnumerable<(object data, int level)> GetContentRecursive<T>(IEnumerable<T> nodes, int level, int stoplevel, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
             if (stoplevel != 0 && level > stoplevel) {
                 yield break; // Stop recursion if the current level exceeds the stopping level
             }
@@ -113,7 +113,7 @@ namespace Haley.Utils
                 }
 
                 if (node.Children?.Any() == true) {
-                    foreach (var childresult in GetPropRecursive(node.Children, level + 1, stoplevel,targetLevels, dataProcesor))
+                    foreach (var childresult in GetContentRecursive(node.Children, level + 1, stoplevel,targetLevels, dataProcesor))
                         yield return childresult;
                 }
             }
