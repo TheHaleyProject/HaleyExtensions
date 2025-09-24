@@ -17,6 +17,20 @@ namespace Haley.Utils
             return fb;
         }
 
+        public static IFeedback AsJsonResult(this IFeedback fb) {
+            try {
+                if (fb == null || string.IsNullOrWhiteSpace(fb.Result?.ToString())) return fb;
+                if (fb.Result is string resString && resString.IsValidJson()) {
+                    fb.Result = JsonNode.Parse(resString);
+                } 
+                return fb;
+
+            } catch (Exception) {
+            }
+            return fb;
+        }
+
+
         public static IFeedback<T> Commit<T>(this IFeedback<T> fb,ITransactionHandler handler) {
             try {
                 if (handler != null) handler.Commit();

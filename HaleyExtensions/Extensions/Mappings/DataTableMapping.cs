@@ -31,7 +31,7 @@ namespace Haley.Utils
         //    }
         //}
 
-        public static IEnumerable<Dictionary<string,object>> Convert(this DataTable source) {
+        public static IEnumerable<Dictionary<string,object>> Convert(this DataTable source,bool handleJson = false) {
             if (source == null) yield break;
             foreach (var row in source.Rows) {
                 if (!(row is DataRow dr)) continue;
@@ -41,8 +41,10 @@ namespace Haley.Utils
                     var colValue = dr.ItemArray[i];
                     if (colValue is System.DBNull || colValue.ToString() == "{}") {
                         colValue = string.Empty;
+                    } else if (colValue is string str && str.IsValidJson() && handleJson) {
+                        colValue = JsonNode.Parse(str);
                     }
-                    rowDic.Add(col.ColumnName, colValue);
+                        rowDic.Add(col.ColumnName, colValue);
                 }
                  yield return rowDic; //Don't yield for each column.. Yield only after all columns of one row is filled.
             }
