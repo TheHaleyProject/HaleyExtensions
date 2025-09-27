@@ -9,42 +9,6 @@ using System.Text.Json.Nodes;
 namespace Haley.Utils
 {
     public static class GeneralExtensions {
-       public static IFeedback<T> Rollback<T>(this IFeedback<T> fb,ITransactionHandler handler) {
-            try {
-                if (handler != null) handler.Rollback();
-            } catch (Exception) {
-            }
-            return fb;
-        }
-
-        public static IFeedback AsJsonResult(this IFeedback fb) {
-            try {
-                if (fb == null || string.IsNullOrWhiteSpace(fb.Result?.ToString())) return fb;
-                if (fb.Result is string resString && resString.IsValidJson()) {
-                    fb.Result = JsonNode.Parse(resString);
-                } 
-                return fb;
-
-            } catch (Exception) {
-            }
-            return fb;
-        }
-
-
-        public static IFeedback<T> Commit<T>(this IFeedback<T> fb,ITransactionHandler handler) {
-            try {
-                if (handler != null) handler.Commit();
-            } catch (Exception) {
-            }
-            return fb;
-        }
-
-
-        public static void Throw(this IFeedback input) {
-            if (input.Status) return;
-            throw new ArgumentException($@"Fail: {input.Message}");
-        }
-
         public static string ToYesNo(this bool? input) {
             if (!input.HasValue) return "None";
             return ToYesNo(input.Value);
