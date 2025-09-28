@@ -35,7 +35,7 @@ namespace Haley.Utils
             if (source == null) yield break;
             foreach (var row in source.Rows) {
                 if (!(row is DataRow dr)) continue;
-                var rowDic = new Dictionary<string, object>();
+                var rowDic = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase); //Ignore case for the dictionary
                 for (int i = 0; i < source.Columns.Count; i++) {
                     var col = source.Columns[i];
                     var colValue = dr.ItemArray[i];
