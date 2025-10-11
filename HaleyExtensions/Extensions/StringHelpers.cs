@@ -58,15 +58,14 @@ namespace Haley.Utils
             }
 
         public static string DeSanitizeBase64(this string input) {
-            //this cannot be base 64
-            if (input.IsBase64()) return input;
-            string result = input.Trim().Replace('_', '/').Replace('-', '+');
+            string result = input.Replace('-', '+').Replace('_', '/');
             switch (result.Length % 4) {
-                case 2: result += "=="; break; //add two equl signs. so we have 4 character.
-                case 3: result += "="; break; //add one equal sign. so we have 4 character.
-                }
-            return result;
+                case 2: result += "=="; break;
+                case 3: result += "="; break;
+                case 1: throw new FormatException("Invalid Base64 string length.");
             }
+            return result;
+        }
 
         public static byte[] GetBytes(this string input) {
             if (!input.IsBase64()) {
@@ -226,9 +225,7 @@ namespace Haley.Utils
         /// </summary>
         /// <returns> if input is not base64, it will return same input. Else it will return sanitized value.</returns>
         public static string SanitizeBase64(this string input) {
-            if (!input.IsBase64()) return input;
-            string result = input.Replace('+', '-').Replace('/', '_').Replace("=", "");
-            return result;
+            return input.Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
         /// <summary>
         /// Convert the Json to dictionary
