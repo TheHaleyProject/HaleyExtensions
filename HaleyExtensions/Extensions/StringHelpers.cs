@@ -67,12 +67,12 @@ namespace Haley.Utils
             return result;
         }
 
-        public static byte[] GetBytes(this string input) {
-            if (!input.IsBase64()) {
-                return Encoding.UTF8.GetBytes(input);
+        public static byte[] GetBytes(this string input, bool decode_base64 = false) {
+            if (decode_base64 && input.IsBase64()) {
+                var _secret = Encoding.UTF8.GetString(Convert.FromBase64String(input));
+                return Encoding.UTF8.GetBytes(_secret);
             }
-            var _secret = Encoding.UTF8.GetString(Convert.FromBase64String(input));
-            return Encoding.UTF8.GetBytes(_secret);
+            return Encoding.UTF8.GetBytes(input);
         }
 
         public static string ToBase64(this string input) {
