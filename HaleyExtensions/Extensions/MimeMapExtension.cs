@@ -667,9 +667,8 @@ namespace Haley.Utils
             }
 
             public static bool TryGetMimeType(string str, out string mimeType) {
-                if (str == null) {
-                    throw new ArgumentNullException(nameof(str));
-                }
+            mimeType = string.Empty;
+            if (str == null) return false;
 
                 var indexQuestionMark = str.IndexOf(QuestionMark, StringComparison.Ordinal);
                 if (indexQuestionMark != -1) {
