@@ -258,6 +258,25 @@ namespace Haley.Utils
             }
         }
 
+        public static bool IsStrongPassword(this string input, int minLength = 8, int maxLength = 48) {
+            try {
+                // ^ start of string
+                // (?=.*[A-Z]) → at least one uppercase
+                // (?=.*[0-9]) → at least one digit
+                // (?=.*[!@#$%^&*(),.?":{}|<>]) → at least one special symbol
+                // .{8,} → minimum 8 characters
+                // $ end of string
+
+                if (minLength < 8) minLength = 8;
+                if (maxLength < minLength) maxLength = minLength + 8;
+
+                string pattern = $@"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?""':{{}}|<>]).{{{minLength},{maxLength}}}$";
+                return Regex.IsMatch(input, pattern);
+            } catch (Exception) {
+                return false;
+            }
+        }
+
         public static string ToIntendedJson(this string input) {
             try {
                 var jobj = JsonObject.Parse(input);
