@@ -57,8 +57,17 @@ namespace Haley.Utils
             return null;
             }
 
-        public static string DeSanitizeBase64(this string input) {
-            string result = input.Replace('-', '+').Replace('_', '/');
+        public static string DeSanitizeBase64(this string input, bool unescape = true) {
+            if (string.IsNullOrWhiteSpace(input)) throw new FormatException("SAMLResponse is empty or null.");
+            string result = unescape ? Uri.UnescapeDataString(input) : input;
+            result = result
+                         .Trim()
+                         .Replace(" ", "+")   // Fix spaces
+                         .Replace("-", "+")   // URL-safe fix
+                         .Replace("_", "/")   // URL-safe fix
+                         .Replace("\r", "")
+                         .Replace("\n", "");
+
             switch (result.Length % 4) {
                 case 2: result += "=="; break;
                 case 3: result += "="; break;
@@ -66,6 +75,8 @@ namespace Haley.Utils
             }
             return result;
         }
+
+        public static byte[] SafeBase64Decode(this string input) => Convert.FromBase64String(input.DeSanitizeBase64());
 
         public static byte[] GetBytes(this string input, bool decode_base64 = false) {
             if (decode_base64 && input.IsBase64()) {
