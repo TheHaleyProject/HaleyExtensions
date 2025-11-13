@@ -77,7 +77,7 @@ namespace Haley.Utils
         }
 
         public static byte[] SafeBase64Decode(this string input) => Convert.FromBase64String(input.DeSanitizeBase64());
-
+        public static string SafeBase64DecodeAsString(this string input) => Encoding.UTF8.GetString(SafeBase64Decode(input));
         public static byte[] GetBytes(this string input, bool decode_base64 = false) {
             if (decode_base64 && input.IsBase64()) {
                 var _secret = Encoding.UTF8.GetString(Convert.FromBase64String(input));
@@ -356,8 +356,6 @@ namespace Haley.Utils
             }
             return result;
         }
-
-
 
         static void DeepConvertJson(Dictionary<string, object> dic,int searchlevel,int currentlevel, string[] ignoreKeys) {
 
