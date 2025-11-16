@@ -341,10 +341,15 @@ namespace Haley.Utils
             }
         }
 
-        public static Dictionary<string,object> ToDictionarySplit(this string input, char delimiter = ';') {
+        public static string[] CleanSplit(this string input, params char[] delimiter) {
+            if (delimiter == null || delimiter.Length < 1) delimiter = new char[] { ';' }; //default delimiter
+            return input.Split(delimiter, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).Distinct().ToArray();
+        }
+
+        public static Dictionary<string,object> ToDictionarySplit(this string input, params char[] delimiter) {
             Dictionary<string, object> result = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             if (string.IsNullOrWhiteSpace(input)) return result;
-            foreach (var prop in input.Trim().Split(delimiter)) {
+            foreach (var prop in input.CleanSplit(delimiter)) {
                 var kvp = prop.Split('=');
                 if (string.IsNullOrWhiteSpace(kvp[0]) || result.ContainsKey(kvp[0])) continue;
                 result.Add(kvp[0]?.Trim(), null); //add the key and value.
