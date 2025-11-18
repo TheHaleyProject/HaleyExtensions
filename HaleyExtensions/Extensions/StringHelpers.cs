@@ -21,7 +21,7 @@ namespace Haley.Utils
         static string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
         public static bool IsValidEmail(this string source) {
             var emailRegex = new Regex(emailPattern);
-            return emailRegex.IsMatch(source ?? string.Empty) ? true : false;
+            return emailRegex.IsMatch(source.Trim() ?? string.Empty);
         }
 
         public static CompareStatus? CompareWith(this string source, string target) {
