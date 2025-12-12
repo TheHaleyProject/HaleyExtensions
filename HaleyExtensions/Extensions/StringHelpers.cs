@@ -23,7 +23,9 @@ namespace Haley.Utils
             var emailRegex = new Regex(emailPattern);
             return emailRegex.IsMatch(source.Trim() ?? string.Empty);
         }
-
+        public static string Normalize(this string input) {
+            return input?.Trim() ?? string.Empty;
+        }
         public static CompareStatus? CompareWith(this string source, string target) {
             var _pattern = @"\d+";
 
