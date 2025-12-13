@@ -11,31 +11,6 @@ namespace Haley.Utils
     {
         #region Conversions
       
-        public static int GetInt(this IDictionary<string, object> row, string key) {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return 0;
-            if (value is int i) return i;
-            if (value is long l) return (int)l;
-            if (value is short s) return s;
-            if (int.TryParse(Convert.ToString(value), out var parsed)) return parsed;
-            return 0;
-        }
-
-        public static long GetLong(this IDictionary<string, object> row, string key) {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return 0L;
-            if (value is long l) return l;
-            if (value is int i) return i;
-            if (long.TryParse(Convert.ToString(value), out var parsed)) return parsed;
-            return 0L;
-        }
-
-        public static string GetString(this IDictionary<string, object> row, string key) {
-            if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return null;
-            return Convert.ToString(value);
-        }
-
         public static JsonNode AsJsonValue(this object input) {
             return input == null ? null : JsonValue.Create(input);
         }

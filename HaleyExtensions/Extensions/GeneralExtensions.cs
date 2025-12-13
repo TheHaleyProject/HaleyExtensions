@@ -30,39 +30,7 @@ namespace Haley.Utils
             return source;
         }
 
-        /// <summary>
-        /// Builds a URL address from the given components 
-        /// </summary>
-        /// <param name="dic">keys: base, route, suffix</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public static string GenerateBaseURLAddress(this Dictionary<string, object> dic) {
-            if (dic == null) throw new ArgumentNullException("Dictionary cannot be null");
-            if (!dic.TryGetValue("base", out var baseObj) || baseObj == null) throw new ArgumentNullException("Key base= is required to define the base address");
-            dic.TryGetValue("route", out var routeObj);
-            dic.TryGetValue("suffix", out var suffixObj);
-            string baseNew = baseObj.ToString();
-            if (routeObj != null && !string.IsNullOrWhiteSpace(routeObj.ToString())) baseNew += routeObj.ToString();
-            if (suffixObj != null && !string.IsNullOrWhiteSpace(suffixObj.ToString())) baseNew += suffixObj.ToString();
-            return baseNew;
-        }
-
-        public static bool ContainsAllEntries<TKey, TValue>(this IDictionary<TKey, TValue> superset, IDictionary<TKey, TValue> subset) {
-           return ContainsAllEntries(superset, subset, null);
-        }
-
-        public static bool ContainsAllEntries<TKey, TValue>(this IDictionary<TKey, TValue> superset, IDictionary<TKey, TValue> subset,Dictionary<TKey, TKey> keyMapping) {
-            foreach (var kvp in subset) {
-                var key = kvp.Key;
-                if (keyMapping != null && keyMapping.ContainsKey(key)) {
-                    key = keyMapping[key]; //Get the key from the mapping.
-                }
-                if (!superset.TryGetValue(key, out var value) || !EqualityComparer<TValue>.Default.Equals(value, kvp.Value)) {
-                    return false;
-                }
-            }
-            return true;
-        }
+       
 
 
         public static IEnumerable<object> GetContentAtLevels<T>(this List<T> roots, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
