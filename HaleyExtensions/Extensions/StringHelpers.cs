@@ -321,10 +321,27 @@ namespace Haley.Utils
             if (!input.AssertValue()) return input;
             var dic = input.ToDictionarySplit(delimiter);
             foreach (var item in replacements) {
-                if (string.IsNullOrWhiteSpace(item.key) || string.IsNullOrWhiteSpace(item.newvalue) || !dic.ContainsKey(item.key)) continue;
-                dic[item.key] = item.newvalue;
+                if (string.IsNullOrWhiteSpace(item.key) || string.IsNullOrWhiteSpace(item.newvalue)) continue;
+                if (!dic.ContainsKey(item.key)) {
+                    dic.Add(item.key, item.newvalue);
+                } else {
+                    dic[item.key] = item.newvalue;
+                }
             }
-            return string.Join(delimiter.ToString(), dic.Where(p => !string.IsNullOrWhiteSpace(p.Key)).Select(q => $@"{q.Key}={q.Value}"));
+            return dic.Join(delimiter);
+        }
+
+        public static string AddOrReplaceValue(this string input, string key, string value, char delimiter = ';') {
+           return ReplaceValues(input, delimiter, (key, value));
+        }
+
+        public static object GetValue(this string input, string key, char delimiter = ';') {
+            if (!input.AssertValue()) return string.Empty;
+            var dic = input.ToDictionarySplit(delimiter);
+            if (dic.ContainsKey(key)) {
+                return dic[key];
+            }
+            return string.Empty;
         }
 
         public static string ReplaceValue(this string input, char delimiter, string key, string newvalue) {

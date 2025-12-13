@@ -25,6 +25,11 @@ namespace Haley.Utils
             return baseNew;
         }
 
+        public static string Join(this IDictionary<string, object> dic, char delimiter = '&') {
+            if (dic == null || dic.Count == 0) return string.Empty;
+            return string.Join(delimiter.ToString(), dic.Where(p => !string.IsNullOrWhiteSpace(p.Key)).Select(q => $@"{q.Key}={q.Value}"));
+        }
+
         public static bool ContainsAllEntries<TKey, TValue>(this IDictionary<TKey, TValue> superset, IDictionary<TKey, TValue> subset) {
             return ContainsAllEntries(superset, subset, null);
         }

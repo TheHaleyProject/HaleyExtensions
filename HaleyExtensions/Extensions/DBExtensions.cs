@@ -121,7 +121,9 @@ namespace Haley.Utils
                 var adapterInfo = agw[args.Key].Info;
                 if (adapterInfo == null) throw new ArgumentNullException($@"Adapter info is null for the given key {args.Key}. Cannot proceed.");
 
-                args.DBName = adapterInfo.DBName ?? args.FallBackDBName; //This is supposedly our db name.
+                //What if the connection string doesn't contain the database name?
+
+                args.DBName = adapterInfo.DBName ?? adapterInfo.ConnectionString?.GetValue("database")?.ToString() ??args.FallBackDBName; //This is supposedly our db name.
 
                 switch (adapterInfo.DBType) {
                     case Enums.TargetDB.maria:
