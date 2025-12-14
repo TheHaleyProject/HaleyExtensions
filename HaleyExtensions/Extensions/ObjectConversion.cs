@@ -20,10 +20,12 @@ namespace Haley.Utils
             Type InputType = value.GetType();
             return (Convert.ChangeType(value, InputType))?.ToString() ?? null;
         }
+
+        public static T As<T>(this object value) => value.ChangeType<T>();
         public static T ChangeType<T>(this object value)
         {
-            if (value == null) return default(T); //because the input value is null, we cannot change any type.
-
+            if (value is null) throw new ArgumentNullException(nameof(value));
+            if (value is T t) return t;
             return (T)ChangeType(value, typeof(T));
         }
 
