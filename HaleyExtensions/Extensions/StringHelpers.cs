@@ -26,6 +26,34 @@ namespace Haley.Utils
         public static string Normalize(this string input) {
             return input?.Trim() ?? string.Empty;
         }
+
+        public static bool ToBool(this string input) {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            
+            switch (input.ToLower()) {
+                case "1":
+                case "true":
+                case "okay":
+                case "success":
+                case "y":
+                case "t":
+                case "yes":
+                case "complete":
+                return true;
+                case "0":
+                case "false":
+                case "notokay":
+                case "not-okay":
+                case "fail":
+                case "n":
+                case "f":
+                case "no":
+                case "incomplete":
+                default:
+                return  false;
+            }
+        }
+
         public static CompareStatus? CompareWith(this string source, string target) {
             var _pattern = @"\d+";
 

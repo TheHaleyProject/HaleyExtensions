@@ -14,8 +14,27 @@ using System.Data.SqlTypes;
 
 namespace Haley.Utils
 {
-    public static class ObjectSetter {
+    public static class ObjectCRUD {
+        public static bool TryGetProp<T>(this object obj, out T value, params string[] names) {
+            value = default(T);
+            if (obj == null || names == null || names.Length < 1) return false;
 
+            var t = obj.GetType();
+            foreach (var n in names) {
+                var p = t.GetProperty(n);
+                if (p == null) continue;
+
+                var raw = p.GetValue(obj);
+                if (raw == null) continue;
+
+                try {
+                    if (raw is T casted_value) { value = casted_value; return true; }
+                    value = raw.As<T>(); 
+                    return true;
+                } catch { /* ignore */ }
+            }
+            return false;
+        }
         public static void SetProperty(this object input, string name,object value, StringComparison comparison = StringComparison.OrdinalIgnoreCase) {
             input?.SetProperty(name,value,null,comparison);
         }

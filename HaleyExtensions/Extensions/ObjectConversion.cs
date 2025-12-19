@@ -10,18 +10,7 @@ namespace Haley.Utils
     public static class ObjectConversion
     {
         #region Conversions
-      
-        public static JsonNode AsJsonValue(this object input) {
-            return input == null ? null : JsonValue.Create(input);
-        }
-        public static string AsString(this object value)
-        {
-            if (value == null) return null;
-            Type InputType = value.GetType();
-            return (Convert.ChangeType(value, InputType))?.ToString() ?? null;
-        }
-
-        public static T As<T>(this object value) => value.ChangeType<T>();
+        
         public static T ChangeType<T>(this object value)
         {
             if (value is null) throw new ArgumentNullException(nameof(value));

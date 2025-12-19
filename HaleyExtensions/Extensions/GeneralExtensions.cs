@@ -30,9 +30,6 @@ namespace Haley.Utils
             return source;
         }
 
-       
-
-
         public static IEnumerable<object> GetContentAtLevels<T>(this List<T> roots, int[] targetLevels, Func<T,int, object> dataProcesor) where T : ICompositeObj<T> {
             int stoplevel = 0;
             if (targetLevels != null && targetLevels.Length > 0) stoplevel = targetLevels.Max();

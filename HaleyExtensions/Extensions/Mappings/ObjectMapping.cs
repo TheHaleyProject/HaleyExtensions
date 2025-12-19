@@ -179,28 +179,7 @@ namespace Haley.Utils
                         //If successfully converted.
                         boolval = local_val;
                     }
-                    if (boolval == null) {
-                        switch (source_value.ToString().ToLower()) {
-                            case "1":
-                            case "true":
-                            case "okay":
-                            case "success":
-                            case "y":
-                            case "t":
-                            case "yes":
-                                boolval = true;
-                                break;
-                            case "0":
-                            case "false":
-                            case "notokay":
-                            case "fail":
-                            case "n":
-                            case "f":
-                            case "no":
-                                boolval = false;
-                                break;
-                        }
-                    }
+                    if (boolval == null) boolval = source_value.ToString().ToBool();
 
                     if (boolval != null) {
                         prop.SetValue(target, boolval, null);
