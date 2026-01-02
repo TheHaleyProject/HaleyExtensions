@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Haley.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -133,6 +134,27 @@ namespace Haley.Utils
             if (bool.TryParse(str, out var pb)) return pb;
             if (int.TryParse(str, out var pi)) return pi != 0;
             return false;
+        }
+
+        public static DbRow ToDbRow(this IDictionary<string, object> src) {
+            var row = new DbRow();
+            if (src == null) return row;
+            foreach (var kv in src)
+                row[kv.Key] = kv.Value;   // will normalize lookup via OrdinalIgnoreCase comparer
+            return row;
+        }
+
+        public static DbRows ToDbRows(this IEnumerable<IDictionary<string, object>> src) {
+            if (src == null) return new DbRows();
+            if (src is ICollection<IDictionary<string, object>> c) {
+                var rows = new DbRows(c.Count);
+                foreach (var d in c) rows.Add(d.ToDbRow());
+                return rows;
+            } else {
+                var rows = new DbRows();
+                foreach (var d in src) rows.Add(d.ToDbRow());
+                return rows;
+            }
         }
     }
 }
