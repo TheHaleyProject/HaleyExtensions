@@ -73,6 +73,18 @@ namespace Haley.Utils
             return Convert.ToString(value);
         }
 
+        public static T Get<T>(this IDictionary<string, object> row, string key) {
+            if (!row.TryGetValue(key, out var v) || v is null) return default;
+            if (v is T t) return t;
+            return (T)Convert.ChangeType(v, typeof(T));
+        }
+
+        public static T? GetN<T>(this IDictionary<string, object> row, string key) where T : struct {
+            if (!row.TryGetValue(key, out var v) || v is null) return null;
+            if (v is T t) return t;
+            return (T)Convert.ChangeType(v, typeof(T));
+        }
+
         public static Guid? GetGuid(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
