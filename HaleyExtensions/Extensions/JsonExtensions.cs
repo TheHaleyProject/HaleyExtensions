@@ -70,5 +70,27 @@ namespace Haley.Utils
             // primitives
             return node.DeepClone();
         }
+
+        public static string? ReqString(this JsonElement e, string prop) => GetString(e, prop);
+
+        public static string? GetString(this JsonElement e, string prop) {
+            if (!e.TryGetProperty(prop, out var v)) return null;
+            return v.ValueKind == JsonValueKind.String ? v.GetString() : v.ToString();
+        }
+
+        public static int? GetInt(this JsonElement e, string prop) {
+            if (!e.TryGetProperty(prop, out var v)) return null;
+            if (v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var i)) return i;
+            if (v.ValueKind == JsonValueKind.String && int.TryParse(v.GetString(), out var j)) return j;
+            return null;
+        }
+
+        public static bool? GetBool(this JsonElement e, string prop) {
+            if (!e.TryGetProperty(prop, out var v)) return null;
+            if (v.ValueKind == JsonValueKind.True) return true;
+            if (v.ValueKind == JsonValueKind.False) return false;
+            if (v.ValueKind == JsonValueKind.String && bool.TryParse(v.GetString(), out var b)) return b;
+            return null;
+        }
     }
 }

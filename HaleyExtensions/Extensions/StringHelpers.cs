@@ -23,8 +23,16 @@ namespace Haley.Utils
             var emailRegex = new Regex(emailPattern);
             return emailRegex.IsMatch(source.Trim() ?? string.Empty);
         }
-        public static string Normalize(this string input) {
-            return input?.Trim() ?? string.Empty;
+        public static string Normalize(this string input, bool tolower = false)=> N(input,tolower);
+        /// <summary>
+        /// Normalize Invariant lowercase trimmed string. If input is null or whitespace, it will return empty string.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="tolower"></param>
+        /// <returns></returns>
+        public static string N(this string input, bool tolower  = true) {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            return tolower ? input.Trim().ToLowerInvariant() : input.Trim();
         }
 
         public static bool ToBool(this string input) {
@@ -105,7 +113,6 @@ namespace Haley.Utils
             }
             return result;
         }
-
         public static byte[] SafeBase64Decode(this string input) => Convert.FromBase64String(input.DeSanitizeBase64());
         public static string SafeBase64DecodeAsString(this string input) => Encoding.UTF8.GetString(SafeBase64Decode(input));
         public static byte[] GetBytes(this string input, bool decode_base64 = false) {
@@ -115,13 +122,11 @@ namespace Haley.Utils
             }
             return Encoding.UTF8.GetBytes(input);
         }
-
         public static string ToBase64(this string input) {
             if (string.IsNullOrWhiteSpace(input)) return input;
             if (input.IsBase64()) return input;
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(input));
         }
-
         public static bool IsBase64(this string input) {
             if (string.IsNullOrEmpty(input) || input.Length % 4 != 0
                || input.Contains(" ") || input.Contains("\t") || input.Contains("\r") || input.Contains("\n"))
@@ -334,7 +339,7 @@ namespace Haley.Utils
 
         public static string ToDBName(this string input) {
             if (string.IsNullOrWhiteSpace(input)) return input;
-            return input.Trim().Replace(" ", "_").ToLower();
+            return input.Trim().Replace(" ", "_").ToLowerInvariant();
         }
 
         public static string RemoveKeys(this string input, char delimiter ,params string[] keys) {
