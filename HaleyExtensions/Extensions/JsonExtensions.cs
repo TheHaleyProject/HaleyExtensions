@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Haley.Utils
@@ -29,6 +30,45 @@ namespace Haley.Utils
             }
             return results;
         }
-        
+
+        // Canonicalize means converting data into a single, standard or preferred format (a 'canonical form') to eliminate variations that do not affect the meaning.
+        //Here we sort object properties by key and array items by their serialized string representation.
+        public static JsonNode Canonicalize(this JsonNode? node, StringComparer? comparer=null) {
+            if (node is null) return JsonValue.Create((string?)null)!;
+            comparer ??= StringComparer.OrdinalIgnoreCase;
+            if (node is JsonObject o) {
+                var sorted = new JsonObject();
+                // IMPORTANT: sort by the trimmed key, not the original key
+                foreach (var kv in o.Select(kv => new { Key = (kv.Key ?? string.Empty).Trim(), Value = kv.Value })
+                .OrderBy(x => x.Key, comparer)) {
+                    sorted[kv.Key] = Canonicalize(kv.Value,comparer);
+                }
+                return sorted;
+            }
+
+            if (node is JsonArray a) {
+                // NOTE: assumes array order is not semantically important
+                var items = a.Select(n=> Canonicalize(n,comparer))
+                              //.Select(n => n.ToJsonString(new JsonSerializerOptions { WriteIndented = false }))
+                              .Select(n => n.ToJsonString()) // deterministic enough for hashing if we keep same serializer version
+                             .OrderBy(s => s, StringComparer.Ordinal)
+                             .ToList();
+
+                var arr = new JsonArray();
+                foreach (var s in items) {
+                    var parsed = JsonNode.Parse(s);
+                    if (parsed != null) {
+                        arr.Add(parsed);
+                    } else {
+                        arr.Add(JsonValue.Create((string?)null));
+                    }
+                }
+
+                return arr;
+            }
+
+            // primitives
+            return node.DeepClone();
+        }
     }
 }

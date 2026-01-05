@@ -5,6 +5,8 @@
     <AssemblyName>Haley.Extensions</AssemblyName>
     <RootNamespace>Haley</RootNamespace>
     <Authors>Lingam</Authors>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
     <Company>TheHaleyProject</Company>
 		  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		  <Authors>Lingam</Authors>
