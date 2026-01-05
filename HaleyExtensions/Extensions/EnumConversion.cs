@@ -16,9 +16,9 @@ namespace Haley.Utils
                 string enum_key = enum_type_name + "###" + enum_value_name; //Concatenated value for storing as key
                 return enum_key;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw ;
             }
         }
 
