@@ -35,6 +35,18 @@ namespace Haley.Utils
             return tolower ? input.Trim().ToLowerInvariant() : input.Trim();
         }
 
+        public static bool TryParseGuidLenient(this string s,out Guid result) {
+            result = Guid.Empty;
+            try {
+                s = s.Trim();
+                if (Guid.TryParseExact(s, "D", out result)) return true;
+                if (Guid.TryParseExact(s, "N", out result)) return true;     // 32 no hyphens
+                return false;
+            } catch (Exception) {
+                return false;
+            }
+        }
+
         public static bool ToBool(this string input) {
             if (string.IsNullOrWhiteSpace(input)) return false;
             
