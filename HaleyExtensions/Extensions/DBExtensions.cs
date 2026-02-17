@@ -114,6 +114,7 @@ namespace Haley.Utils
         public static async Task<IFeedback> CreateDatabase(this IAdapterGateway agw, DbCreationArgs args) {
             var fb = new Feedback().SetSource("HALEY-DB-UTILS");
             try {
+                //Agw also has the default adapter key. but dont take it.. Sometimes, user might make mistakes and forget to send the key.. We dont' want any side effects.. What if they are working on production application and set up the default key?.. Dont mess up.. Always expect the key.
                 if (args == null || string.IsNullOrWhiteSpace(args.Key)) throw new ArgumentNullException("Key cannot be empty.");
                 //If the service or the db doesn't exist, we throw exception or else the system would assume that nothing is wrong. If they wish , they can still turn of the indexing.
                 if (!agw.ContainsKey(args.Key)) throw new ArgumentException($@"Load SQL Failed.No adapter found for the given key {args.Key}");
