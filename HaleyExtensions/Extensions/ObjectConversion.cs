@@ -64,6 +64,29 @@ namespace Haley.Utils
             var _result = conversion_method.Invoke(null, new[] { casted_objects });
             return _result;
         }
+
+        public static bool TryToBool(this object value, out bool b)
+        {
+            switch (value)
+            {
+                case bool vb: b = vb; return true;
+                case byte by: b = by != 0; return true;                 // TINYINT(1)
+                case sbyte sby: b = sby != 0; return true;
+                case short sh: b = sh != 0; return true;
+                case ushort ush: b = ush != 0; return true;
+                case int vi: b = vi != 0; return true;
+                case uint u: b = u != 0; return true;
+                case long vl: b = vl != 0; return true;
+                case ulong ul: b = ul != 0; return true;
+                case decimal dec: b = dec != 0m; return true;
+                case double d: b = d != 0d; return true;
+                case float f: b = f != 0f; return true;
+                case byte[] arr when arr.Length > 0: b = arr[0] != 0; return true; // BIT(1) as bytes
+                case string s: b = s.ToBool(); return true;
+            }
+            b = default;
+            return false;
+        }
         #endregion
 
         #region Helpers
