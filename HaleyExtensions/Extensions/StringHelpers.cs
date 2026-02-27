@@ -18,10 +18,15 @@ namespace Haley.Utils
 {
     public static class StringHelpers
     {
-        static string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
         public static bool IsValidEmail(this string source) {
-            var emailRegex = new Regex(emailPattern);
-            return emailRegex.IsMatch(source.Trim() ?? string.Empty);
+            try {
+                if (string.IsNullOrWhiteSpace(source)) return false;
+                var parsed = source.Trim().ToLower();
+                var addr = new MailAddress(parsed);
+                return addr.Address == parsed;
+            } catch (Exception) {
+                return false;
+            }
         }
         public static string Normalize(this string input, bool tolower = false)=> N(input,tolower);
         /// <summary>
