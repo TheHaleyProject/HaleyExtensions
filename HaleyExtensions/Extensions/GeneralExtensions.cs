@@ -5,10 +5,38 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 namespace Haley.Utils
 {
     public static class GeneralExtensions {
+
+        public static async Task<T> SafeReadAsync<T>(this Task<T> task) {
+            try {
+                return await task;
+            } catch {
+                return default;
+            }
+        }
+
+        public static string FirstNonEmpty(params string?[] values) {
+            foreach (var value in values) {
+                if (!string.IsNullOrWhiteSpace(value)) {
+                    return value;
+                }
+            }
+            return "";
+        }
+
+        public static int FirstPositive(params int?[] values) {
+            foreach (var value in values) {
+                if (value.HasValue && value.Value > 0) {
+                    return value.Value;
+                }
+            }
+            return 0;
+        }
+
         public static string ToYesNo(this bool? input) {
             if (!input.HasValue) return "None";
             return ToYesNo(input.Value);
