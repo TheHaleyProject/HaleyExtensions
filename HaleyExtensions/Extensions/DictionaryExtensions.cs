@@ -67,6 +67,17 @@ namespace Haley.Utils
             return 0L;
         }
 
+        public static byte GetByte(this IDictionary<string, object> row, string key) {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (!row.TryGetValue(key, out var value) || value == null) return 0;
+
+            try {
+                return Convert.ToByte(value);
+            } catch {
+                return 0;
+            }
+        }
+
         public static string GetString(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null) return null;
@@ -102,6 +113,19 @@ namespace Haley.Utils
             if (value is long l) return (int)l;
             if (value is short s) return s;
             if (int.TryParse(Convert.ToString(value), out var parsed)) return parsed;
+            return null;
+        }
+
+        public static byte? GetNullableByte(this IDictionary<string, object> row, string key) {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+
+            if (value is byte b) return b;
+            if (value is int i && i >= byte.MinValue && i <= byte.MaxValue) return (byte)i;
+            if (value is long l && l >= byte.MinValue && l <= byte.MaxValue) return (byte)l;
+            if (value is short s && s >= byte.MinValue && s <= byte.MaxValue) return (byte)s;
+
+            if (byte.TryParse(Convert.ToString(value), out var parsed)) return parsed;
             return null;
         }
 
