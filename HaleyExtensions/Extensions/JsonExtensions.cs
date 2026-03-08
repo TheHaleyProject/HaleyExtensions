@@ -121,6 +121,24 @@ namespace Haley.Utils {
             return new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase) { ["value"] = el.GetObject() };
         }
 
+        public static bool? ReadOptionalBool(this JsonElement obj, string propName) {
+            if (!obj.TryGetProperty(propName, out var el)) return null;
+            if (el.ValueKind == JsonValueKind.True) return true;
+            if (el.ValueKind == JsonValueKind.False) return false;
+            return null;
+        }
+
+        public static IReadOnlyList<string> ReadList(this JsonElement obj, string propName) {
+            if (!obj.TryGetProperty(propName, out var el) || el.ValueKind != JsonValueKind.Array) return Array.Empty<string>();
+            var list = new List<string>();
+            foreach (var x in el.EnumerateArray()) {
+                if (x.ValueKind != JsonValueKind.String) continue;
+                var s = x.GetString();
+                if (!string.IsNullOrWhiteSpace(s)) list.Add(s!);
+            }
+            return list;
+        }
+
         public static object? GetObject(this JsonElement el) {
             switch (el.ValueKind) {
                 case JsonValueKind.Null:
