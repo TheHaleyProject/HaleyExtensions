@@ -94,7 +94,10 @@ namespace Haley.Utils {
         public static bool? GetBool(this JsonElement e) {
             if (e.ValueKind == JsonValueKind.True) return true;
             if (e.ValueKind == JsonValueKind.False) return false;
-            if (e.ValueKind == JsonValueKind.String && bool.TryParse(e.GetString(), out var b)) return b;
+            if (e.ValueKind == JsonValueKind.String) {
+               if (bool.TryParse(e.GetString(), out var b)) return b;
+               if (e.GetString().TryToBool(out var c)) return c;
+            }
             return null;
         }
 
