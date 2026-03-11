@@ -192,5 +192,18 @@ namespace Haley.Utils
                 return rows;
             }
         }
+
+        public static IReadOnlyList<Dictionary<string, object?>> ToDictionaries(this DbRows rows) {
+            var result = new List<Dictionary<string, object?>>(rows.Count);
+            for (var i = 0; i < rows.Count; i++) {
+                var row = rows[i];
+                var item = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in row) {
+                    item[entry.Key] = entry.Value == DBNull.Value ? null : entry.Value;
+                }
+                result.Add(item);
+            }
+            return result;
+        }
     }
 }
