@@ -1,4 +1,4 @@
-﻿using Haley.Models;
+using Haley.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -210,8 +210,21 @@ namespace Haley.Utils
             if (!item.TryGetValue(fieldName, out var raw) || raw == null) return;
             if (!raw.TryConvertToInt(out var code)) return;
 
-            item[fieldName] = Enum.IsDefined(typeof(TEnum), code)
-                ? Enum.GetName(typeof(TEnum), code)
+            var enumType = typeof(TEnum);
+            object enumValue;
+
+            try {
+                // Normalize numeric values to the target enum type first. This avoids
+                // Enum.IsDefined throwing when the enum is byte-backed and the incoming
+                // DB value was converted to int.
+                enumValue = Enum.ToObject(enumType, code);
+            } catch {
+                item[fieldName] = $"Unknown({code})";
+                return;
+            }
+
+            item[fieldName] = Enum.IsDefined(enumType, enumValue)
+                ? Enum.GetName(enumType, enumValue)
                 : $"Unknown({code})";
         }
     }
