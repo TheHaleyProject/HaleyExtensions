@@ -87,6 +87,43 @@ namespace Haley.Utils
             b = default;
             return false;
         }
+
+        public static bool TryConvertToInt(this object raw, out int value) {
+            switch (raw) {
+                case int i:
+                    value = i;
+                    return true;
+                case long l:
+                    value = checked((int)l);
+                    return true;
+                case short s:
+                    value = s;
+                    return true;
+                case byte b:
+                    value = b;
+                    return true;
+                case sbyte sb:
+                    value = sb;
+                    return true;
+                case uint ui:
+                    value = checked((int)ui);
+                    return true;
+                case ulong ul:
+                    value = checked((int)ul);
+                    return true;
+                case string str when int.TryParse(str, out var parsed):
+                    value = parsed;
+                    return true;
+                default:
+                    try {
+                        value = Convert.ToInt32(raw);
+                        return true;
+                    } catch {
+                        value = 0;
+                        return false;
+                    }
+            }
+        }
         #endregion
 
         #region Helpers

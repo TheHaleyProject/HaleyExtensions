@@ -205,5 +205,14 @@ namespace Haley.Utils
             }
             return result;
         }
+
+        public static void MapEnumField<TEnum>(this Dictionary<string, object?> item, string fieldName) where TEnum : struct, Enum {
+            if (!item.TryGetValue(fieldName, out var raw) || raw == null) return;
+            if (!raw.TryConvertToInt(out var code)) return;
+
+            item[fieldName] = Enum.IsDefined(typeof(TEnum), code)
+                ? Enum.GetName(typeof(TEnum), code)
+                : $"Unknown({code})";
+        }
     }
 }
