@@ -115,7 +115,16 @@ namespace Haley.Utils
             var fb = new Feedback().SetSource("HALEY-DB-UTILS");
             try {
                 //Agw also has the default adapter key. but dont take it.. Sometimes, user might make mistakes and forget to send the key.. We dont' want any side effects.. What if they are working on production application and set up the default key?.. Dont mess up.. Always expect the key.
-                if (args == null || string.IsNullOrWhiteSpace(args.Key)) throw new ArgumentNullException("Key cannot be empty.");
+                if (args == null || string.IsNullOrWhiteSpace(args.Key)) throw new ArgumentNullException("Adapter Key is needed to generate a database.");
+
+                //First pass
+                if (!agw.ContainsKey(args.Key)) {
+                    //Check if cloning is present or not.
+                    if (string.IsNullOrWhiteSpace(args.CloningAdapterKey)) throw new ArgumentNullException($@"No adapter found for the given key {args.Key}");
+                    if (!agw.ContainsKey(args.CloningAdapterKey)) throw new ArgumentNullException($@"No adapter found for the provided cloning key {args.CloningAdapterKey}.");
+                    //In this case, we just duplicate and create the adapter.
+                    agw.DuplicateAdapter(args.CloningAdapterKey, args.Key, ("database", args.DBName)); //this will just generate the adapter but not create the database.
+                }
                 //If the service or the db doesn't exist, we throw exception or else the system would assume that nothing is wrong. If they wish , they can still turn of the indexing.
                 if (!agw.ContainsKey(args.Key)) throw new ArgumentException($@"Load SQL Failed.No adapter found for the given key {args.Key}");
                 //Next step is to find out if the database exists or not? Should we even try to check if the database exists or directly run the sql script and create the database if it doesn't exists?
