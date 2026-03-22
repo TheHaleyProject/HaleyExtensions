@@ -184,9 +184,7 @@ namespace Haley.Utils
                 //Step 1 : Remove delimiter lines
                 content = Regex.Replace(content, @"DELIMITER\s+\S+", "", RegexOptions.IgnoreCase); //Remove the delimiter comments
 
-                //Step 2 : Remove version-specific comments
-                content = Regex.Replace(content, @"/\*!.*?\*/;", "", RegexOptions.Singleline);
-                //Step 3 : Extract all Procedures
+                //Step 2 : Extract all Procedures
                 string pattern = @"CREATE\s+PROCEDURE.*?END\s*//";
                 var matches = Regex.Matches(content, pattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
@@ -196,16 +194,27 @@ namespace Haley.Utils
                     procedures.Add(proc);
                     content = content.Replace(match.Value, "");
                 }
-                // Step 4: Split remaining SQL by semicolon
-                queryContent = Regex.Split(content, @";\s*(?=\n|$)", RegexOptions.Multiline);
-                //queryContent = Regex.Split(content, @";\s*(?=\n|$)", RegexOptions.Multiline);
+                // Step 4: Split remaining SQL by semicolon and drop empty chunks
+                queryContent = Regex.Split(content, @";\s*(?=\n|$)", RegexOptions.Multiline)
+                                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                                    .ToArray();
             }
 
             var handler = agw.GetTransactionHandler(args.Key);
             using (handler.Begin(true)) {
-                await agw.NonQuery(new AdapterArgs(args.Key) { ExcludeDBInConString = true, Query = queryContent }.ForTransaction(handler));
-                if (procedures.Count > 0) {
-                    await agw.NonQuery(new AdapterArgs(args.Key) { ExcludeDBInConString = true, Query = procedures.ToArray() }.ForTransaction(handler));
+                try {
+                    await agw.NonQuery(new AdapterArgs(args.Key) { ExcludeDBInConString = true, Query = queryContent }.ForTransaction(handler));
+                    if (procedures.Count > 0) {
+                        await agw.NonQuery(new AdapterArgs(args.Key) { ExcludeDBInConString = true, Query = procedures.ToArray() }.ForTransaction(handler));
+                    }
+                } catch (Exception) {
+                    handler.Rollback();
+                    // DDL (CREATE TABLE) causes implicit commits in MariaDB — rollback cannot undo them.
+                    // Drop the partially-created database so no half-cooked schema is left behind.
+                    try {
+                        await agw.NonQuery(new AdapterArgs(args.Key) { ExcludeDBInConString = true, Query = $"DROP DATABASE IF EXISTS `{args.DBName}`;" });
+                    } catch { /* best-effort cleanup — swallow so original exception propagates */ }
+                    throw;
                 }
             }
 
