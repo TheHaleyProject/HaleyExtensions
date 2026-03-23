@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
@@ -117,6 +118,98 @@ namespace Haley.Utils
                 default:
                     try {
                         value = Convert.ToInt32(raw);
+                        return true;
+                    } catch {
+                        value = 0;
+                        return false;
+                    }
+            }
+        }
+
+        public static bool TryConvertToLong(this object raw, out long value) {
+            switch (raw) {
+                case long l:
+                    value = l;
+                    return true;
+                case int i:
+                    value = i;
+                    return true;
+                case short s:
+                    value = s;
+                    return true;
+                case byte b:
+                    value = b;
+                    return true;
+                case sbyte sb:
+                    value = sb;
+                    return true;
+                case uint ui:
+                    value = ui;
+                    return true;
+                case ulong ul:
+                    value = checked((long)ul);
+                    return true;
+                case decimal dec:
+                    value = checked((long)dec);
+                    return true;
+                case double d:
+                    value = checked((long)d);
+                    return true;
+                case float f:
+                    value = checked((long)f);
+                    return true;
+                case string str when long.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed):
+                    value = parsed;
+                    return true;
+                default:
+                    try {
+                        value = Convert.ToInt64(raw, CultureInfo.InvariantCulture);
+                        return true;
+                    } catch {
+                        value = 0;
+                        return false;
+                    }
+            }
+        }
+
+        public static bool TryConvertToDouble(this object raw, out double value) {
+            switch (raw) {
+                case double d:
+                    value = d;
+                    return true;
+                case float f:
+                    value = f;
+                    return true;
+                case decimal dec:
+                    value = (double)dec;         // decimal → double can lose precision, intentional
+                    return true;
+                case long l:
+                    value = l;
+                    return true;
+                case int i:
+                    value = i;
+                    return true;
+                case short s:
+                    value = s;
+                    return true;
+                case byte b:
+                    value = b;
+                    return true;
+                case sbyte sb:
+                    value = sb;
+                    return true;
+                case uint ui:
+                    value = ui;
+                    return true;
+                case ulong ul:
+                    value = ul;
+                    return true;
+                case string str when double.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed):
+                    value = parsed;
+                    return true;
+                default:
+                    try {
+                        value = Convert.ToDouble(raw, CultureInfo.InvariantCulture);
                         return true;
                     } catch {
                         value = 0;
