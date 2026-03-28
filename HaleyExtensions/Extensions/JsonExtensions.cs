@@ -75,12 +75,22 @@ namespace Haley.Utils {
             return v.ValueKind == JsonValueKind.String ? v.GetString() : v.ToString();
         }
 
-        public static int? GetInt(this JsonElement e, string prop) {
-            if (!e.TryGetProperty(prop, out var v)) return null;
-            return v.GetInt();
+        public static string? GetString(this JsonElement e, params string[] props) {
+            foreach (var prop in props) { var val = e.GetString(prop); if (val != null) return val; }
+            return e.ValueKind == JsonValueKind.String ? e.GetString() : null;
         }
 
-        public static int? GetInt(this JsonElement e) {
+        public static int? GetInt(this JsonElement e, string prop) {
+            if (!e.TryGetProperty(prop, out var v)) return null;
+            return v.GetIntValue();
+        }
+
+        public static int? GetInt(this JsonElement e, params string[] props) {
+            foreach (var prop in props) { var val = e.GetInt(prop); if (val != null) return val; }
+            return e.GetIntValue();
+        }
+
+        public static int? GetIntValue(this JsonElement e) {
             if (e.ValueKind == JsonValueKind.Number && e.TryGetInt32(out var i)) return i;
             if (e.ValueKind == JsonValueKind.String && int.TryParse(e.GetString(), out var j)) return j;
             return null;
@@ -89,6 +99,11 @@ namespace Haley.Utils {
         public static bool? GetBool(this JsonElement e, string prop) {
             if (!e.TryGetProperty(prop, out var v)) return null;
             return v.GetBool();
+        }
+
+        public static bool? GetBool(this JsonElement e, params string[] props) {
+            foreach (var prop in props) { var val = e.GetBool(prop); if (val != null) return val; }
+            return e.GetBool();
         }
 
         public static bool? GetBool(this JsonElement e) {
@@ -106,6 +121,11 @@ namespace Haley.Utils {
             return el.GetDatetimeOffset();
         }
 
+        public static DateTimeOffset? GetDatetimeOffset(this JsonElement obj, params string[] props) {
+            foreach (var prop in props) { var val = obj.GetDatetimeOffset(prop); if (val != null) return val; }
+            return obj.GetDatetimeOffset();
+        }
+
         public static DateTimeOffset? GetDatetimeOffset(this JsonElement el) {
             return DateTimeOffset.TryParse(el.GetString(), out var dt) ? dt : null;
         }
@@ -113,6 +133,11 @@ namespace Haley.Utils {
         public static IReadOnlyDictionary<string, object?>? GetDictionary(this JsonElement obj, string prop) {
             if (string.IsNullOrWhiteSpace(prop) || !obj.TryGetProperty(prop, out var pEl) || pEl.ValueKind == JsonValueKind.Null || pEl.ValueKind == JsonValueKind.Undefined) return null;
             return pEl.GetDictionary();
+        }
+
+        public static IReadOnlyDictionary<string, object?>? GetDictionary(this JsonElement obj, params string[] props) {
+            foreach (var prop in props) { var val = obj.GetDictionary(prop); if (val != null) return val; }
+            return obj.ValueKind == JsonValueKind.Object ? obj.GetDictionary() : null;
         }
 
         public static IReadOnlyDictionary<string, object?> GetDictionary(this JsonElement el) {
@@ -140,6 +165,14 @@ namespace Haley.Utils {
                 if (!string.IsNullOrWhiteSpace(s)) list.Add(s!);
             }
             return list;
+        }
+
+        public static IReadOnlyList<string> ReadList(this JsonElement obj, params string[] propNames) {
+            foreach (var prop in propNames) {
+                var val = obj.ReadList(prop);
+                if (val.Count > 0) return val;
+            }
+            return Array.Empty<string>();
         }
 
         public static object? GetObject(this JsonElement el) {
