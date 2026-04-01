@@ -125,7 +125,9 @@ namespace Haley.Utils
                     }
                 }
                 return target;
-            } catch (Exception) {
+            } catch (Exception ex) {
+                Console.WriteLine(ex);
+                if (mapping_info.ThrowExceptions) throw;
                 return null;
             }
         }
