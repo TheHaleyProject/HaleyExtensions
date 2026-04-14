@@ -96,6 +96,12 @@ namespace Haley.Utils {
             return null;
         }
 
+        public static long? GetLongValue(this JsonElement e) {
+            if (e.ValueKind == JsonValueKind.Number && e.TryGetInt64(out var l)) return l;
+            if (e.ValueKind == JsonValueKind.String && long.TryParse(e.GetString(), out var j)) return j;
+            return null;
+        }
+
         public static bool? GetBool(this JsonElement e, string prop) {
             if (!e.TryGetProperty(prop, out var v)) return null;
             return v.GetBool();
