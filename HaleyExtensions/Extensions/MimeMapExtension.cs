@@ -1,12 +1,14 @@
-﻿using Haley.Enums;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Haley.Utils {
     public static class MimeMapExtension {
         private const string DefaultMime = "application/octet-stream";
+
+        private static readonly ConcurrentDictionary<string, string> _customMappings =
+            new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         private static readonly Dictionary<string, string> _mappings =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -93,6 +95,28 @@ namespace Haley.Utils {
             return lastDot >= 0 ? input.Substring(lastDot) : input;
         }
 
+        /// <summary>
+        /// Replaces the current runtime MIME overrides with the provided mappings.
+        /// Keys are normalized through <see cref="ExtractExtension(string)"/>, so
+        /// callers may pass either "pdf" or ".pdf".
+        /// </summary>
+        public static void LoadCustomMappings(IDictionary<string, string> mappings) {
+            _customMappings.Clear();
+
+            if (mappings == null || mappings.Count == 0)
+                return;
+
+            foreach (var entry in mappings) {
+                if (string.IsNullOrWhiteSpace(entry.Key) || string.IsNullOrWhiteSpace(entry.Value))
+                    continue;
+
+                var ext = ExtractExtension(entry.Key);
+                if (string.IsNullOrWhiteSpace(ext))
+                    continue;
+
+                _customMappings[ext] = entry.Value.Trim();
+            }
+        }
 
         public static bool TryGetMimeType(string input, out string mime) {
             mime = DefaultMime;
@@ -106,6 +130,11 @@ namespace Haley.Utils {
             var ext = ExtractExtension(input);
             if (string.IsNullOrWhiteSpace(ext))
                 return false;
+
+            if (_customMappings.TryGetValue(ext, out var customFound)) {
+                mime = customFound;
+                return true;
+            }
 
             if (_mappings.TryGetValue(ext, out var found)) {
                 mime = found;
