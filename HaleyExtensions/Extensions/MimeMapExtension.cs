@@ -4,10 +4,8 @@ using System.Collections.Generic;
 
 namespace Haley.Utils {
     public static class MimeMapExtension {
-        private const string DefaultMime = "application/octet-stream";
-
-        private static readonly ConcurrentDictionary<string, string> _customMappings =
-            new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, string[]> _customMappings =
+            new ConcurrentDictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly Dictionary<string, string> _mappings =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -95,31 +93,8 @@ namespace Haley.Utils {
             return lastDot >= 0 ? input.Substring(lastDot) : input;
         }
 
-        /// <summary>
-        /// Replaces the current runtime MIME overrides with the provided mappings.
-        /// Keys are normalized through <see cref="ExtractExtension(string)"/>, so
-        /// callers may pass either "pdf" or ".pdf".
-        /// </summary>
-        public static void LoadCustomMappings(IDictionary<string, string> mappings) {
-            _customMappings.Clear();
-
-            if (mappings == null || mappings.Count == 0)
-                return;
-
-            foreach (var entry in mappings) {
-                if (string.IsNullOrWhiteSpace(entry.Key) || string.IsNullOrWhiteSpace(entry.Value))
-                    continue;
-
-                var ext = ExtractExtension(entry.Key);
-                if (string.IsNullOrWhiteSpace(ext))
-                    continue;
-
-                _customMappings[ext] = entry.Value.Trim();
-            }
-        }
-
-        public static bool TryGetMimeType(string input, out string mime) {
-            mime = DefaultMime;
+        private static bool TryExtractLookupExtension(string input, out string extension) {
+            extension = string.Empty;
             if (string.IsNullOrWhiteSpace(input))
                 return false;
 
@@ -127,24 +102,89 @@ namespace Haley.Utils {
             if (input.Contains("/") && !input.StartsWith("."))
                 return false; // to prevent reverse mapping vulnerabilities
 
-            var ext = ExtractExtension(input);
-            if (string.IsNullOrWhiteSpace(ext))
-                return false;
-
-            if (_customMappings.TryGetValue(ext, out var customFound)) {
-                mime = customFound;
-                return true;
-            }
-
-            if (_mappings.TryGetValue(ext, out var found)) {
-                mime = found;
-                return true;
-            }
-
-            return false;
+            extension = ExtractExtension(input);
+            return !string.IsNullOrWhiteSpace(extension);
         }
 
-        public static string GetMimeType(string input) =>
-            TryGetMimeType(input, out var mime) ? mime : DefaultMime;
+        private static string[] NormalizeMimeValues(string[] values) {
+            if (values == null)
+                return Array.Empty<string>();
+
+            var normalized = new List<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var value in values) {
+                if (string.IsNullOrWhiteSpace(value))
+                    continue;
+
+                var trimmed = value.Trim();
+                if (seen.Add(trimmed))
+                    normalized.Add(trimmed);
+            }
+
+            return normalized.ToArray();
+        }
+
+        /// <summary>
+        /// Replaces the current runtime custom MIME mappings with the provided values.
+        /// Each extension may have one or more valid MIME types.
+        /// </summary>
+        public static void LoadCustomMappings(IDictionary<string, string[]> mappings) {
+            _customMappings.Clear();
+
+            if (mappings == null || mappings.Count == 0)
+                return;
+
+            foreach (var entry in mappings) {
+                if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null)
+                    continue;
+
+                var ext = ExtractExtension(entry.Key);
+                if (string.IsNullOrWhiteSpace(ext))
+                    continue;
+
+                var values = NormalizeMimeValues(entry.Value);
+                if (values.Length == 0)
+                    continue;
+
+                _customMappings[ext] = values;
+            }
+        }
+
+        /// <summary>
+        /// Returns all known MIME types for the given extension by combining runtime custom mappings
+        /// with the built-in defaults.
+        /// </summary>
+        public static bool TryGetMimeTypes(string input, out string[] mimeTypes) {
+            mimeTypes = Array.Empty<string>();
+            if (!TryExtractLookupExtension(input, out var ext))
+                return false;
+
+            var orderedTypes = new List<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (_mappings.TryGetValue(ext, out var builtInMime)) {
+                orderedTypes.Add(builtInMime);
+                seen.Add(builtInMime);
+            }
+
+            if (_customMappings.TryGetValue(ext, out var customFound)) {
+                foreach (var customMime in customFound) {
+                    if (string.IsNullOrWhiteSpace(customMime))
+                        continue;
+
+                    if (seen.Add(customMime))
+                        orderedTypes.Add(customMime);
+                }
+            }
+
+            if (orderedTypes.Count == 0)
+                return false;
+
+            mimeTypes = orderedTypes.ToArray();
+            return true;
+        }
+
+        public static string[] GetMimeTypes(string input) =>
+            TryGetMimeTypes(input, out var mimeTypes) ? mimeTypes : Array.Empty<string>();
     }
 }
