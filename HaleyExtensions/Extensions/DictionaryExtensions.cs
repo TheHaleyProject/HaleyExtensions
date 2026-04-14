@@ -10,6 +10,26 @@ using System.Text.Json.Nodes;
 namespace Haley.Utils
 {
     public static class DictionaryExtensions {
+        static bool TryResolveValue(IEnumerable<KeyValuePair<string, object>> row, string key, out object value) {
+            value = null;
+            if (row == null) return false;
+
+            if (row is IDictionary<string, object> dict)
+                return dict.TryGetValue(key, out value);
+
+            if (row is IReadOnlyDictionary<string, object> readOnlyDict)
+                return readOnlyDict.TryGetValue(key, out value);
+
+            foreach (var entry in row) {
+                if (string.Equals(entry.Key, key, StringComparison.OrdinalIgnoreCase)) {
+                    value = entry.Value;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Builds a URL address from the given components 
         /// </summary>
@@ -49,9 +69,9 @@ namespace Haley.Utils
             return true;
         }
 
-        public static int GetInt(this IDictionary<string, object> row, string key) {
+        public static int GetInt(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return 0;
+            if (!TryResolveValue(row, key, out var value) || value == null) return 0;
             if (value is JsonElement jsonElement) return jsonElement.GetIntValue() ?? 0;
             if (value is int i) return i;
             if (value is long l) return (int)l;
@@ -60,9 +80,9 @@ namespace Haley.Utils
             return 0;
         }
 
-        public static long GetLong(this IDictionary<string, object> row, string key) {
+        public static long GetLong(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return 0L;
+            if (!TryResolveValue(row, key, out var value) || value == null) return 0L;
             if (value is JsonElement jsonElement) return jsonElement.GetLongValue() ?? 0L;
             if (value is long l) return l;
             if (value is int i) return i;
@@ -70,9 +90,9 @@ namespace Haley.Utils
             return 0L;
         }
 
-        public static byte GetByte(this IDictionary<string, object> row, string key) {
+        public static byte GetByte(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return 0;
+            if (!TryResolveValue(row, key, out var value) || value == null) return 0;
 
             try {
                 return Convert.ToByte(value);
@@ -81,28 +101,30 @@ namespace Haley.Utils
             }
         }
 
-        public static string GetString(this IDictionary<string, object> row, string key) {
+        public static string GetString(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null) return null;
+            if (!TryResolveValue(row, key, out var value) || value == null) return null;
             if (value is JsonElement jsonElement) return jsonElement.ValueKind == JsonValueKind.String ? jsonElement.GetString() : jsonElement.ToString();
             return Convert.ToString(value);
         }
 
-        public static T Get<T>(this IDictionary<string, object> row, string key) {
-            if (!row.TryGetValue(key, out var v) || v is null) return default;
-            if (v is T t) return t;
-            return (T)Convert.ChangeType(v, typeof(T));
-        }
-
-        public static T? GetN<T>(this IDictionary<string, object> row, string key) where T : struct {
-            if (!row.TryGetValue(key, out var v) || v is null) return null;
-            if (v is T t) return t;
-            return (T)Convert.ChangeType(v, typeof(T));
-        }
-
-        public static Guid? GetGuid(this IDictionary<string, object> row, string key) {
+        public static T Get<T>(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (!TryResolveValue(row, key, out var v) || v is null) return default;
+            if (v is T t) return t;
+            return (T)Convert.ChangeType(v, typeof(T));
+        }
+
+        public static T? GetN<T>(this IEnumerable<KeyValuePair<string, object>> row, string key) where T : struct {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (!TryResolveValue(row, key, out var v) || v is null) return null;
+            if (v is T t) return t;
+            return (T)Convert.ChangeType(v, typeof(T));
+        }
+
+        public static Guid? GetGuid(this IEnumerable<KeyValuePair<string, object>> row, string key) {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return null;
             if (value is Guid g) return g;
             if (value is string s && Guid.TryParse(s, out var gs)) return gs;
             if (Guid.TryParse(Convert.ToString(value), out var parsed)) return parsed;
@@ -110,9 +132,9 @@ namespace Haley.Utils
         }
 
 
-        public static int? GetNullableInt(this IDictionary<string, object> row, string key) {
+        public static int? GetNullableInt(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return null;
             if (value is JsonElement jsonElement) return jsonElement.GetIntValue();
             if (value is int i) return i;
             if (value is long l) return (int)l;
@@ -121,9 +143,9 @@ namespace Haley.Utils
             return null;
         }
 
-        public static byte? GetNullableByte(this IDictionary<string, object> row, string key) {
+        public static byte? GetNullableByte(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return null;
 
             if (value is byte b) return b;
             if (value is int i && i >= byte.MinValue && i <= byte.MaxValue) return (byte)i;
@@ -134,9 +156,9 @@ namespace Haley.Utils
             return null;
         }
 
-        public static long? GetNullableLong(this IDictionary<string, object> row, string key) {
+        public static long? GetNullableLong(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return null;
             if (value is JsonElement jsonElement) return jsonElement.GetLongValue();
             if (value is long l) return l;
             if (value is int i) return i;
@@ -144,27 +166,27 @@ namespace Haley.Utils
             return null;
         }
 
-        public static DateTime? GetDateTime(this IDictionary<string, object> row, string key) {
+        public static DateTime? GetDateTime(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return null;
             if (value is DateTime dt) return dt;
             if (value is DateTimeOffset dto) return dto.UtcDateTime;
             if (DateTime.TryParse(Convert.ToString(value), out var parsed)) return parsed;
             return null;
         }
 
-        public static DateTimeOffset? GetDateTimeOffset(this IDictionary<string, object> row, string key) {
+        public static DateTimeOffset? GetDateTimeOffset(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return null;
             if (value is DateTimeOffset dto) return dto;
             if (value is DateTime dt) return new DateTimeOffset(dt);
             if (DateTimeOffset.TryParse(Convert.ToString(value), out var parsed)) return parsed;
             return null;
         }
 
-        public static bool GetBool(this IDictionary<string, object> row, string key) {
+        public static bool GetBool(this IEnumerable<KeyValuePair<string, object>> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
-            if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return false;
+            if (!TryResolveValue(row, key, out var value) || value == null || value == DBNull.Value) return false;
             if (value is JsonElement jsonElement) return jsonElement.GetBool() ?? false;
             if (value is bool b) return b;
             if (value is sbyte sb) return sb != 0;
@@ -172,8 +194,14 @@ namespace Haley.Utils
             if (value is short s) return s != 0;
             if (value is int i) return i != 0;
             if (value is long l) return l != 0;
+            if (value is char ch) {
+                if (ch == 't' || ch == 'T') return true;
+                if (ch == 'f' || ch == 'F') return false;
+            }
             var str = Convert.ToString(value);
             if (string.IsNullOrWhiteSpace(str)) return false;
+            if (string.Equals(str, "t", StringComparison.OrdinalIgnoreCase)) return true;
+            if (string.Equals(str, "f", StringComparison.OrdinalIgnoreCase)) return false;
             if (bool.TryParse(str, out var pb)) return pb;
             if (int.TryParse(str, out var pi)) return pi != 0;
             return false;
