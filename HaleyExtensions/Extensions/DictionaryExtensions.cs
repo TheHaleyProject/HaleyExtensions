@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Haley.Utils
@@ -51,6 +52,7 @@ namespace Haley.Utils
         public static int GetInt(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null) return 0;
+            if (value is JsonElement jsonElement) return jsonElement.GetIntValue() ?? 0;
             if (value is int i) return i;
             if (value is long l) return (int)l;
             if (value is short s) return s;
@@ -61,6 +63,7 @@ namespace Haley.Utils
         public static long GetLong(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null) return 0L;
+            if (value is JsonElement jsonElement) return jsonElement.GetLongValue() ?? 0L;
             if (value is long l) return l;
             if (value is int i) return i;
             if (long.TryParse(Convert.ToString(value), out var parsed)) return parsed;
@@ -81,6 +84,7 @@ namespace Haley.Utils
         public static string GetString(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null) return null;
+            if (value is JsonElement jsonElement) return jsonElement.ValueKind == JsonValueKind.String ? jsonElement.GetString() : jsonElement.ToString();
             return Convert.ToString(value);
         }
 
@@ -109,6 +113,7 @@ namespace Haley.Utils
         public static int? GetNullableInt(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (value is JsonElement jsonElement) return jsonElement.GetIntValue();
             if (value is int i) return i;
             if (value is long l) return (int)l;
             if (value is short s) return s;
@@ -132,6 +137,7 @@ namespace Haley.Utils
         public static long? GetNullableLong(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return null;
+            if (value is JsonElement jsonElement) return jsonElement.GetLongValue();
             if (value is long l) return l;
             if (value is int i) return i;
             if (long.TryParse(Convert.ToString(value), out var parsed)) return parsed;
@@ -159,6 +165,7 @@ namespace Haley.Utils
         public static bool GetBool(this IDictionary<string, object> row, string key) {
             if (row == null) throw new ArgumentNullException(nameof(row));
             if (!row.TryGetValue(key, out var value) || value == null || value == DBNull.Value) return false;
+            if (value is JsonElement jsonElement) return jsonElement.GetBool() ?? false;
             if (value is bool b) return b;
             if (value is sbyte sb) return sb != 0;
             if (value is byte by) return by != 0;
