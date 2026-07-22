@@ -143,7 +143,7 @@ namespace Haley.Utils
                     throw new NotImplementedException($@"The target db type {adapterInfo.DBType} is not implemented for loading the initial sql.");
                 }
             } catch (Exception ex) {
-                return fb.SetMessage(ex.Message).SetTrace(ex.StackTrace).SetCode((int)HttpStatusCode.InternalServerError);
+                return fb.SetMessage(ex.Message).SetTrace(ex.ToString()).SetCode((int)HttpStatusCode.InternalServerError);
             }
         }
         static async Task<IFeedback> CreateDatabaseMaria(this IAdapterGateway agw, DbCreationArgs args) {
