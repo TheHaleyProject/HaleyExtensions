@@ -20,7 +20,12 @@ namespace Haley.Utils
         }
 
         public static IFeedback AsFeedBack<T>(this IFeedback<T> fb) {
-            return new Feedback(fb.Status, fb.Message) { Result = fb.Result };
+            return new Feedback(fb.Status, fb.Message, fb.Result) {
+                Key = fb.Key,
+                Code = fb.Code,
+                Source = fb.Source,
+                Trace = fb.Trace
+            };
         }
 
         public static IFeedback AsJsonResult(this IFeedback fb) {
