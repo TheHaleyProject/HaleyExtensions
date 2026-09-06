@@ -1,11 +1,12 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace Haley.Utils {
     public static class MimeMapExtension {
-        private static readonly ConcurrentDictionary<string, string[]> _customMappings =
-            new ConcurrentDictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        private static IReadOnlyDictionary<string, string[]> _customMappings =
+            new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly Dictionary<string, string> _mappings =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -129,25 +130,33 @@ namespace Haley.Utils {
         /// Each extension may have one or more valid MIME types.
         /// </summary>
         public static void LoadCustomMappings(IDictionary<string, string[]> mappings) {
-            _customMappings.Clear();
+            var replacement = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+            if (mappings != null) {
+                foreach (var entry in mappings) {
+                    if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null)
+                        continue;
 
-            if (mappings == null || mappings.Count == 0)
-                return;
+                    var ext = ExtractExtension(entry.Key);
+                    if (string.IsNullOrWhiteSpace(ext))
+                        continue;
 
-            foreach (var entry in mappings) {
-                if (string.IsNullOrWhiteSpace(entry.Key) || entry.Value == null)
-                    continue;
-
-                var ext = ExtractExtension(entry.Key);
-                if (string.IsNullOrWhiteSpace(ext))
-                    continue;
-
-                var values = NormalizeMimeValues(entry.Value);
-                if (values.Length == 0)
-                    continue;
-
-                _customMappings[ext] = values;
+                    var values = NormalizeMimeValues(entry.Value);
+                    if (values.Length > 0)
+                        replacement[ext] = values;
+                }
             }
+
+            Volatile.Write(ref _customMappings, replacement);
+        }
+
+        /// <summary>Returns an isolated snapshot of the current custom MIME mappings.</summary>
+        public static IReadOnlyDictionary<string, string[]> GetCustomMappings() {
+            return Volatile.Read(ref _customMappings)
+                .OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    entry => entry.Key,
+                    entry => entry.Value.ToArray(),
+                    StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -167,7 +176,7 @@ namespace Haley.Utils {
                 seen.Add(builtInMime);
             }
 
-            if (_customMappings.TryGetValue(ext, out var customFound)) {
+            if (Volatile.Read(ref _customMappings).TryGetValue(ext, out var customFound)) {
                 foreach (var customMime in customFound) {
                     if (string.IsNullOrWhiteSpace(customMime))
                         continue;
